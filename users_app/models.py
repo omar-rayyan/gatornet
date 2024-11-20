@@ -68,6 +68,8 @@ class UserManager(models.Manager):
         user = User.objects.create(first_name=postData['first_name'], last_name=postData['last_name'], email=postData['email'], password=hashed_password, date_of_birth=postData['date_of_birth'], gender=postData['gender'])
         PersonalDetails.objects.create_personal_details_record(user)
         return user
+    def get_user(self, id):
+        return User.objects.get(id=id)
 
 class User(models.Model):
     first_name = models.CharField(max_length=45)
