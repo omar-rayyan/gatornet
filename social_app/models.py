@@ -11,9 +11,8 @@ class PostsManager(models.Manager):
     def delete_post(self, post_id):
         post = Post.objects.get(id=post_id)
         post.delete()
-    def update_post(self, data):
-        post = Post.objects.get(id=data['post_id'])
-        post.content = data['content']
+    def update_post(self, post, new_content):
+        post.content = new_content
         post.save()
     def create_post(self, data):
         return Post.objects.create(content=data['content'], creator=data['creator'], shared=data['shared'], shared_post_id=data['shared_post_id'])
@@ -30,6 +29,8 @@ class PostsManager(models.Manager):
     def get_post_comments_count(self, post_id):
         post = Post.objects.get(id=post_id)
         return post.comments.count()
+    def get_post(self, post_id):
+        return Post.objects.get(id=post_id)
 
 class CommentManager(models.Manager):
     def basic_validator(self, postData):
@@ -41,9 +42,8 @@ class CommentManager(models.Manager):
     def delete_comment(self, comment_id):
         comment = Comment.objects.get(id=comment_id)
         comment.delete()
-    def update_comment(self, data):
-        comment = Comment.objects.get(id=data['comment_id'])
-        comment.content = data['content']
+    def update_comment(self, comment, new_content):
+        comment.content = new_content
         comment.save()
     def create_comment(self, data):
         return Comment.objects.create(content=data['content'], user=data['user'], post=data['post'])
@@ -61,41 +61,61 @@ class FriendshipManager(models.Manager):
             friendship_2.delete()
 
 class LikeManager(models.Manager):
-    def add_like(self, data):
-        post = Post.objects.get(id=data['post_id'])
-        return Like.objects.create(user=data['user'], post=post)
-    def remove_like(self, data):
-        user = User.objects.get(id=data['user_id'])
-        post = Post.objects.get(id=data['post_id'])
+    def add_like(self, post_id, user_id):
+        post = Post.objects.get(id=post_id)
+        user = User.objects.get(id=user_id)
+        return Like.objects.create(user=user, post=post)
+    def remove_like(self, post_id, user_id):
+        post = Post.objects.get(id=post_id)
+        user = User.objects.get(id=user_id)
         like = Like.objects.get(user=user, post=post)
         like.delete()
     def get_likes_count(self, post_id):
         post = Post.objects.get(id=post_id)
         return post.likes.count()
-    def has_user_liked_post(self, data):
-        user = User.objects.get(id=data['user_id'])
-        post = Post.objects.get(id=data['post_id'])
+    def has_user_liked_post(self, post_id, user_id):
+        post = Post.objects.get(id=post_id)
+        user = User.objects.get(id=user_id)
         like = Like.objects.get(user=user, post=post)
         return True if like else False
 
 class PersonalDetailsManager(models.Manager):
+    def basic_validator(data):
+        errors = {}
+        if len(data['bio']) > 500:
+            errors['bio'] = 'Bio must not exceed 500 characters.'
+        if len(data['location']) > 100:
+            errors['location'] = 'Location must not exceed 100 characters.'
+        if len(data['workplace']) > 100:
+            errors['workplace'] = 'Workplace must not exceed 100 characters.'
+        if data['phone_number'] and not data['phone_number'].isdigit():
+            errors['phone_number'] = 'Phone number must contain only digits.'
+        if len(data['relationship_status']) > 50:
+            errors['relationship_status'] = 'Relationship status must not exceed 50 characters.'
+        return errors
     def create_personal_details_record(self, user):
         PersonalDetails.objects.create(user=user, bio='', location='', workplace='', phone_number='', relationship_status='')
     def update_personal_details_record(self, data):
         record = PersonalDetails.objects.get(user=data['user'])
-        if data['bio']:
+        if data.get('bio'):
             record.bio = data['bio']
-        if data['location']:
+        if data.get('location'):
             record.location = data['location']
-        if data['workplace']:
+        if data.get('workplace'):
             record.workplace = data['workplace']
-        if data['phone_number']:
+        if data.get('phone_number'):
             record.phone_number = data['phone_number']
-        if data['relationship_status']:
+        if data.get('relationship_status'):
             record.relationship_status = data['relationship_status']
         record.save()
         
 class MessageManager(models.Manager):
+    def basic_validator(self, postData):
+        errors = {}
+        if len(postData['content']) < 1:
+            errors["content"] = "You cannot send an empty message."
+            return errors
+        return errors
     def send_message(self, data):
         sender = User.objects.get(id=data['sender_id'])
         recipient = User.objects.get(id=data['recipient_id'])
