@@ -23,7 +23,10 @@
 
 }
 
-
+#message-error {
+    color: red;
+    display: block;
+}
 #mainContainer {
     /* Which contains the login card and the registration card.*/
     border: #558067 solid 0.4vh;

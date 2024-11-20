@@ -2,7 +2,6 @@ from django.db import models
 import bcrypt
 import re
 from datetime import datetime
-from social_app.models import *
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 
@@ -18,18 +17,12 @@ class UserManager(models.Manager):
         if len(postData['email']) < 1:
             errors["email"] = "Please provide an email address."
             return errors
-        if postData['gender'] == 'none':
-            errors["gender"] = "Please choose a gender first."
-            return errors
-        if not postData['date_of_birth']:
-            errors["date_of_birth"] = "Please select your date of birth first."
-            return errors
-        date_of_birth = datetime.strptime(postData['date_of_birth'], "%Y-%m-%d").date()
-        if date_of_birth > datetime.today().date():
-            errors["date_of_birth"] = "Please select a valid date of birth."
-            return errors
         if not EMAIL_REGEX.match(postData['email']):
             errors["email"] = "The email address you've entered is invalid."
+            return errors
+        existing_email = User.objects.filter(email=postData['email']).exclude(id=postData.get('id'))
+        if existing_email.exists():
+            errors["email"] = "This email address was already used before. Please login or use a different email address."
             return errors
         if len(postData['password']) < 8:
             errors["password"] = "Password should be at least 8 characters."
@@ -37,9 +30,15 @@ class UserManager(models.Manager):
         if postData['password'] != postData['passwordconfirmation']:
             errors["passwordconfirmation"] = "Passwords do not match."
             return errors
-        existing_email = User.objects.filter(email=postData['email']).exclude(id=postData.get('id'))
-        if existing_email.exists():
-            errors["email"] = "This email address was already used before. Please login or use a different email address."
+        if not postData['date_of_birth']:
+            errors["date_of_birth"] = "Please select your date of birth first."
+            return errors
+        date_of_birth = datetime.strptime(postData['date_of_birth'], "%Y-%m-%d").date()
+        if date_of_birth > datetime.today().date():
+            errors["date_of_birth"] = "Please select a valid date of birth, as date of birth cannot be in the future."
+            return errors
+        if not postData.get('gender'):
+            errors["gender"] = "Please choose a gender first."
             return errors
         return errors
     def login_validator(self, postData):
@@ -56,7 +55,7 @@ class UserManager(models.Manager):
         else:
             user = User.objects.filter(email=postData['email']).first()
             if not user:
-                errors["email"] = "No user account with this email address was found. Please register."
+                errors["email"] = "No user account with this email address was found."
                 return errors
             else:
                 if not bcrypt.checkpw(postData['password'].encode(), user.password.encode()):
@@ -64,6 +63,7 @@ class UserManager(models.Manager):
                     return errors
         return errors
     def create_user(self, postData):
+        from social_app.models import PersonalDetails
         hashed_password = bcrypt.hashpw(postData['password'].encode(), bcrypt.gensalt()).decode()
         user = User.objects.create(first_name=postData['first_name'], last_name=postData['last_name'], email=postData['email'], password=hashed_password, date_of_birth=postData['date_of_birth'], gender=postData['gender'])
         PersonalDetails.objects.create_personal_details_record(user)
@@ -80,6 +80,7 @@ class User(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = UserManager()
     def friends(self):
+        from social_app.models import Friendship
         friendships = Friendship.objects.filter(models.Q(friend_1=self) | models.Q(friend_2=self))
         friends = [friendship.friend_1 if friendship.friend_2 == self else friendship.friend_2 for friendship in friendships]
         return friends

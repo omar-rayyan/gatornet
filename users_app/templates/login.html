@@ -3,47 +3,56 @@
     <title>GatorNet | Log-In</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 </head>
 
-
-<body class="bg-white" >
-
+<body class="bg-white min-h-screen flex flex-col justify-between">
 
     <header class="bg-green-700 p-4 flex items-center" id="navbar">
-        <div class="rounded-full flex items-center justify-center" >
-        <img src="{% static 'img/logo.png' %}" />
+        <div class="rounded-full flex items-center justify-center">
+            <img src="{% static 'img/logo.png' %}" id="logo" class="h-12 w-12" />
         </div>
-        <h1 class="text-white text-5xl ml-auto mr-auto" id="NavBartext">GatorNet</h1>
+        <h1 class="text-white text-5xl ml-auto mr-auto font-bold" id="NavBartext">GatorNet</h1>
     </header>
 
-
-    <main class="flex justify-center mt-20" >
-        <div class="bg-gray-100 rounded-lg shadow-lg w-1/2" id="mainContainer"> 
-            <div class="bg-green-700 text-white text-center py-2 rounded-t-lg " id="headerLogIn">
-                <h2 class="text-xl" id="headerCardText">Log In</h2>
+    <main class="flex-grow flex justify-center items-center">
+        <div class="bg-gray-100 rounded-lg shadow-lg w-full max-w-lg" id="mainContainer">
+            <div class="bg-green-700 text-white text-center py-4 rounded-t-lg" id="headerLogIn">
+                <h2 class="text-xl font-semibold" id="headerCardText">Log In</h2>
             </div>
-            <div class="p-4" id="textInLogIN">
-                <label class="block mb-2">Enter your email:</label>
-                <input type="text" class="w-full p-2 mb-4 border rounded" />
-                <label class="block mb-2">Enter your password:</label>
-                <input type="password" class="w-full p-2 mb-4 border rounded" />
-                <label>Don't have an account yet? Create one <a href="#" class="text-blue-800" >here.</a></label>
-                <div id="buttonClass">
-                <button class="bg-green-700 text-white rounded" id="button" >Log In</button>
+            <div class="p-6" id="textInLogIN">
+                <form action="{% url 'login' %}" method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <label class="block font-medium">
+                        Enter your email:
+                        <input type="text" class="w-full p-2 mt-1 border rounded" name="email" value="{% if 'loginform' in request.session %}{{ request.session.loginform.email }}{% endif %}" />
+                    </label>
+                    <label class="block font-medium">
+                        Enter your password:
+                        <input type="password" class="w-full p-2 mt-1 border rounded" name="password" value="{% if 'loginform' in request.session %}{{ request.session.loginform.password }}{% endif %}" />
+                    </label>
+                    <p class="text-sm">
+                        Don't have an account yet? 
+                        <a href="{% url 'view_registration_page' %}" class="text-blue-800 font-medium hover:underline">Create one here.</a>
+                    </p>
+                    {% for message in messages %}
+                        <p class="text-red-500 text-sm font-medium" id="message-error">{{ message }}</p>
+                    {% endfor %}
+                    <div class="text-center mt-4" id="buttonClass">
+                        <button type="submit" class="bg-green-700 text-white px-6 py-0 rounded shadow hover:bg-green-600 transition" id="button">Log In</button>
+                    </div>
+                </form>
             </div>
-        </div>
-
         </div>
     </main>
-    <div id="class"></div>
 
     <footer class="bg-green-700 text-white text-center py-4 mt-10" id="bottomPage">
-        <a href="#" class="text-blue-300">About us</a>
-        <span class="mx-4">|</span>
-        <span>Copyright and such!</span>
+        <div class="space-x-4">
+            <a href="#" class="text-blue-300 hover:underline">About Us</a>
+            <span>|</span>
+            <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
+        </div>
     </footer>
 
 </body>
