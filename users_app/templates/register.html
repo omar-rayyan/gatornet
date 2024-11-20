@@ -1,0 +1,63 @@
+<html>
+<head>
+    <title>GatorNet | Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+
+
+<body class="bg-white" >
+
+
+    <header class="bg-green-700 p-4 flex items-center" id="navbar">
+        <div class="rounded-full flex items-center justify-center" >
+        <img src="{% static 'img/logo.png' %}" />
+        </div>
+        <h1 class="text-white text-5xl ml-auto mr-auto" id="NavBartext">GatorNet</h1>
+    </header>
+
+
+
+
+    <main class="flex justify-center mt-10" id="main">
+        <div class="bg-gray-100 rounded-lg shadow-lg w-1/2" id="mainContainer"> 
+            <div class="bg-green-700 text-white text-center py-2 mt-0 rounded-t-lg" id="headerReg">
+                <h2 class="text-xl" id="headerCardText">Register</h2>
+            </div>
+            <div class="p-4" id="textInReg">
+                <label class="block mb-2">First Name:</label>
+                <input type="text" class="w-full p-2 mb-4 border rounded" />
+                <label class="block mb-2">Last Name:</label>
+                <input type="text" class="w-full p-2 mb-4 border rounded" />
+                <label class="block mb-2">Email:</label>
+                <input type="email" class="w-full p-2 mb-4 border rounded" />
+                <label class="block mb-2">Password:</label>
+                <input type="password" class="w-full p-2 mb-4 border rounded" />
+                <label class="block mb-2">Confirm password:</label>
+                <input type="password" class="w-full p-2 mb-4 border rounded" />
+                <label class="block mb-2">Date Of Birth:</label>
+                <input type="date" class="w-full p-2 mb-4 border rounded" />
+                <div class="flex items-center mb-4" id="gender">
+                    <label class="block mb-2" id="labelSelector">Gender: </label>
+                    <input type="radio" name="gender" class="mr-2" /> <label for="">Male</label>
+                    <input type="radio" name="gender" class="ml-4 mr-2" /> <label for="">Female</label>
+                </div>
+                <div id="buttonClass">
+
+                <button class="bg-green-700 text-white rounded" id="button" >Register</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <footer class="bg-green-700 text-white text-center py-4 mt-10" id="bottomPage">
+        <a href="#" class="text-blue-300">About us</a>
+        <span class="mx-4">|</span>
+        <span>Copyright and such!</span>
+    </footer>
+</body>
+</html>
