@@ -18,9 +18,6 @@
 
     <main class="flex-grow flex justify-center items-center">
         <div class="bg-gray-100 rounded-lg shadow-lg w-full max-w-lg" id="mainContainer">
-            <div class="bg-green-700 text-white text-center py-4 rounded-t-lg" id="headerLogIn">
-                <h2 class="text-xl font-semibold" id="headerCardText">Log In</h2>
-            </div>
             <div class="p-6" id="textInLogIN">
                 <form action="{% url 'login' %}" method="post" class="space-y-4">
                     {% csrf_token %}
@@ -39,7 +36,7 @@
                     {% for message in messages %}
                         <p class="text-red-500 text-sm font-medium" id="message-error">{{ message }}</p>
                     {% endfor %}
-                    <div class="text-center mt-4" id="buttonClass">
+                    <div class="text-center mt-6" id="buttonClass">
                         <button type="submit" class="bg-green-700 text-white px-6 py-0 rounded shadow hover:bg-green-600 transition" id="button">Log In</button>
                     </div>
                 </form>
