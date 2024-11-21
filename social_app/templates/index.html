@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | GatorNet</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-green-700 p-[2vh] flex items-center" id="navbar">
+        <div class="rounded-full flex items-center justify-center">
+            <img src="{% static 'img/logo.png' %}" id="logo" class="h-[6vh] w-[6vh]" alt="Logo">
+        </div>
+        <h1 class="text-white text-[4vh] ml-auto font-bold">Edit Profile</h1>
+        <div class="ml-auto">
+
+            <button class="text-white px-[2vh] py-[0vh] mr-[3vh]" id="button">Log Out</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex flex-grow">
+        <!-- Left Content -->
+        <div class="w-[150vh] mx-auto bg-white shadow-md rounded-lg p-[3.5vh]">
+            <div class="flex items-center mb-[2vh]">
+                <!-- Profile Picture -->
+                <div class="relative">
+                    <img src="{% static 'img/default-profile.png' %}" alt="Profile" class="h-[10vh] w-[10vh] rounded-full border-[0.3vh] border-gray-300">
+                    <label for="profile-pic" class="absolute bottom-0 right-0 bg-gray-700 text-white p-[1vh] rounded-full cursor-pointer">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input id="profile-pic" type="file" class="hidden">
+                </div>
+                <h2 class="text-[2.2vh] font-bold ml-[2vh]">Profile of User</h2>
+            </div>
+
+            <form class="grid grid-cols-2 gap-[3vh]">
+                <!-- Edit Name -->
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Edit Name:</label>
+                    <input type="text" placeholder="Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                </div>
+                <!-- Add Phone -->
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Add Phone Number:</label>
+                    <input type="text" placeholder="Phone Number" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                </div>
+                <!-- Add Bio -->
+                <div class="col-span-2">
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Add Bio:</label>
+                    <textarea placeholder="Add a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded"></textarea>
+                </div>
+                <!-- Change Password -->
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Current Password:</label>
+                    <input type="password" placeholder="Current Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Email:</label>
+                    <input type="email" placeholder="Email" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">New Password:</label>
+                    <input type="password" placeholder="New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Confirm New Password:</label>
+                    <input type="password" placeholder="Confirm New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    
+                </div>
+                <div></div>                
+            </form>
+            <div class="text-center mt-4">
+            <button class="text-white px-[2vh] py-[0vh] " id="button">Update</button>
+        </div>
+    </div>
+        <!-- Right Sidebar -->
+        <div class="w-[40vh] bg-gray-50 border-l border-gray-200 p-[2vh] overflow-y-auto">
+            <h3 class="text-[2vh] font-bold mb-[2vh]">User Profiles</h3>
+            <ul>
+                {% for user in users %}
+                <li class="flex items-center space-x-[1vh] py-[1vh]">
+                    <img src="{% static 'img/default-profile.png' %}" alt="Profile" class="h-[5vh] w-[5vh] rounded-full">
+                    <span class="text-gray-800 font-medium text-[1.8vh]">Name of User</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-green-700 text-white text-center py-[2vh]" id="bottomPage">
+        <div class="space-x-[2vh]">
+            <a href="#" class="text-blue-300 hover:underline text-[1.8vh]">About Us</a>
+            <span>|</span>
+            <span class="text-[1.8vh]">&copy; 2024 GatorNet. All Rights Reserved.</span>
+        </div>
+    </footer>
+
+</body>
+
+</html>
