@@ -4,7 +4,6 @@ from django.contrib import messages
 
 def root(request):
     return redirect('home')
-
 def home(request):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
@@ -13,7 +12,9 @@ def home(request):
         'posts': User.objects.get_friends_posts(int(request.session['user_id']))
     }
     return render(request, 'home.html', context)
+def home_dev(request):
 
+    return render(request, 'home.html')
 def view_post(request, id):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
