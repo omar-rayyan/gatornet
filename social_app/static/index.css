@@ -1,0 +1,143 @@
+#navbar {
+    /* for navbar in to the page*/
+    background-color: #558067;
+    height: 10vh;
+}
+
+
+#logo {
+    /* for the logo in the navbar*/
+    width: 8vh;
+    height: 8vh;
+    border-radius: 50%;
+    margin: 0 0 0 3vh;
+}
+
+#headerLogIn {
+    /* for the header in the login card*/
+    background-color: #558067;
+    font-weight: bold;
+    border-radius: 0vh;
+
+
+
+}
+
+#message-error {
+    color: red;
+    display: block;
+}
+
+#mainContainer {
+    /* Which contains the login card and the registration card.*/
+    border: #558067 solid 0.4vh;
+    border-radius: 2vh;
+    box-shadow: 0.5vh 0 3vh 0vh #558067;
+    background-color: rgb(220, 220, 220);
+    border-radius: 1.2vh;
+
+
+}
+
+
+
+#textInLogIn {
+    /* for the text in the login card*/
+    color: #558067;
+    font-weight: bold;
+    font-size: 2vh;
+
+
+}
+
+
+
+#textInReg {
+    /* for the text in the Register card*/
+    color: #558067;
+    font-weight: bold;
+    font-size: 2vh;
+}
+
+
+#button, #updatebutton {
+    /* for all button in the login & Register page*/
+    background-color: rgb(220, 220, 220);
+    color: #558067;
+    border: #558067 solid 0.4vh;
+    font-size: 2.5vh;
+    border-radius: 80vh;
+    height: 5vh;
+    width: 16vh;
+
+
+
+
+}
+
+#button:hover,
+#updatebutton:hover {
+    /*To make an effect on the buttons when you hover on it*/
+    background-color: #558067;
+    color: white;
+    border-color: rgb(220, 220, 220);
+    font-weight: normal;
+}
+
+#buttonClass {
+    /*To adjust the position of the buttons in the middle of the cards*/
+    text-align: center;
+    margin: 1vh 0 0 0;
+}
+
+
+#headerReg {
+    /* for the header in the Register card*/
+    background-color: #558067;
+    border-radius: 0vh;
+    font-weight: bold;
+
+
+}
+
+#gender {
+    /*for the input type radio */
+    padding: 2vh;
+    font-size: 2vh;
+}
+
+#bottomPage {
+    /*for bottom the page*/
+    background-color: #558067;
+    font-size: 2vh;
+
+
+
+
+
+}
+
+#labelSelector {
+    margin: 0 2vh 0 0;
+}
+
+
+
+
+#NavBartext {
+    font-size: 7vh;
+}
+
+#headerCardText {
+    font-size: 3vh;
+
+}
+
+#class {
+    height: 25vh;
+}
+
+
+#updatebutton {
+    text-align: right;
+}

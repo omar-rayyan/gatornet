@@ -4,7 +4,6 @@ from django.contrib import messages
 
 def root(request):
     return redirect('home')
-
 def home(request):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
