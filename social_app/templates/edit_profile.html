@@ -15,7 +15,9 @@
     <!-- Header -->
     <header class="bg-green-700 p-[2vh] flex items-center" id="navbar">
         <div class="rounded-full flex items-center justify-center">
-            <img src="{% static 'img/logo.png' %}" id="logo" class="h-[6vh] w-[6vh]" alt="Logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/logo.png' %}" id="logo" class="h-[6vh] w-[6vh]" alt="Logo">
+            </a>
         </div>
         <h1 class="text-white text-[4vh] ml-auto font-bold">Edit Profile</h1>
         <div class="ml-auto">
@@ -37,48 +39,57 @@
                     </label>
                     <input id="profile-pic" type="file" class="hidden">
                 </div>
-                <h2 class="text-[2.2vh] font-bold ml-[2vh]">Profile of User</h2>
+                <h2 class="text-[2.2vh] font-bold ml-[2vh]">{{ user.first_name }} {{ user.last_name }}</h2>
             </div>
 
-            <form class="grid grid-cols-2 gap-[3vh]">
+            <form action='{% url "edit_profile" %}' method="post" class="grid grid-cols-2 gap-[3vh]">
+                {% csrf_token %}
                 <!-- Edit Name -->
                 <div>
                     <label class="block text-gray-700 font-medium text-[1.8vh]">Edit Name:</label>
-                    <input type="text" placeholder="Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    <input type="text" placeholder="First Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name='first_name' value="{{ user.first_name }}">
+                    <input type="text" placeholder="Last Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name='last_name' value="{{ user.last_name }}">
                 </div>
                 <!-- Add Phone -->
                 <div>
                     <label class="block text-gray-700 font-medium text-[1.8vh]">Add Phone Number:</label>
-                    <input type="text" placeholder="Phone Number" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    <input type="text" placeholder="Phone Number" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="phone_number" value="{{ personal_details.phone_number }}">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Relationship Status:</label>
+                    <input type="text" placeholder="Relationship Status" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="relationship_status" value="{{ personal_details.relationship_status }}">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium text-[1.8vh]">Workplace:</label>
+                    <input type="text" placeholder="Workplace" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="workplace" value="{{ personal_details.workplace }}">
                 </div>
                 <!-- Add Bio -->
                 <div class="col-span-2">
                     <label class="block text-gray-700 font-medium text-[1.8vh]">Add Bio:</label>
-                    <textarea placeholder="Add a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded"></textarea>
+                    <textarea placeholder="Add a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="bio">{{ personal_details.bio }}</textarea>
                 </div>
                 <!-- Change Password -->
                 <div>
                     <label class="block text-gray-700 font-medium text-[1.8vh]">Current Password:</label>
-                    <input type="password" placeholder="Current Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    <input type="password" placeholder="Current Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="current_password">
                 </div>
                 <div>
                     <label class="block text-gray-700 font-medium text-[1.8vh]">Email:</label>
-                    <input type="email" placeholder="Email" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    <input type="email" placeholder="Email" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="email" value="{{ user.email }}">
                 </div>
                 <div>
                     <label class="block text-gray-700 font-medium text-[1.8vh]">New Password:</label>
-                    <input type="password" placeholder="New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    <input type="password" placeholder="New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="new_password">
                 </div>
                 <div>
                     <label class="block text-gray-700 font-medium text-[1.8vh]">Confirm New Password:</label>
-                    <input type="password" placeholder="Confirm New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded">
+                    <input type="password" placeholder="Confirm New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="confirm_new_password">
                     
                 </div>
-                <div></div>                
+                <div id="updatebuttondiv" class="col-span-2">
+                    <button class="text-white px-[2vh] py-[0vh]" id="button">Update</button>
+                </div>
             </form>
-            <div class="text-center mt-4">
-            <button class="text-white px-[2vh] py-[0vh] " id="button">Update</button>
-        </div>
     </div>
         <!-- Right Sidebar -->
         <div class="w-[40vh] bg-gray-50 border-l border-gray-200 p-[2vh] overflow-y-auto">

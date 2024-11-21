@@ -4,6 +4,7 @@ from django.contrib import messages
 
 def root(request):
     return redirect('home')
+
 def home(request):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
@@ -12,6 +13,18 @@ def home(request):
         'posts': User.objects.get_friends_posts(int(request.session['user_id']))
     }
     return render(request, 'home.html', context)
+
+def view_edit_profile_page(request):
+    if not 'user_id' in request.session:
+        messages.error(request, 'You must first login.', extra_tags='login')
+        return redirect('/')
+    user = User.objects.get_user(int(request.session['user_id']))
+    personal_detials = PersonalDetails.objects.get(user=user)
+    context = {
+        'user': user,
+        'personal_details': personal_detials,
+    }
+    return render(request, 'edit_profile.html', context)
 
 def view_post(request, id):
     if not 'user_id' in request.session:
@@ -239,7 +252,7 @@ def edit_post(request):
         return redirect('view_post', id=post_id)
     return redirect('home')
 
-def update_personal_details(request):
+def update_profile(request):
     if request.method == 'POST':
         if not 'user_id' in request.session:
             messages.error(request, 'You must first login.', extra_tags='login')
@@ -259,5 +272,5 @@ def update_personal_details(request):
                 messages.error(request, value, extra_tags='update_personal_details')
             return redirect('edit_profile', id=user.id)
         PersonalDetails.objects.update_personal_details_record(data)
-        return redirect('view_profile', id=user.id)
+        return redirect('view_edit_profile_page')
     return redirect('home')
