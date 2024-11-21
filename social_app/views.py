@@ -9,10 +9,8 @@ def home(request):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
         return redirect('/')
-    context = {
-        'posts': User.objects.get_friends_posts(int(request.session['user_id']))
-    }
-    return render(request, 'home.html', context)
+
+    return render(request, 'home_page.html')
 
 def view_edit_profile_page(request):
     if not 'user_id' in request.session:

@@ -1,0 +1,49 @@
+#navbar {
+    /* for navbar in to the page*/
+    background-color: #558067;
+    height: 10vh;
+}
+
+
+
+#logo {
+    /* for the logo in the navbar*/
+    width: 8vh;
+    height: 8vh;
+    border-radius: 50%;
+    margin: 0 0 0 3vh;
+}
+
+
+#button {
+    /* for all button in the login & Register page*/
+    background-color: rgb(220, 220, 220);
+    color: #558067;
+    border: #558067 solid 0.4vh;
+    font-size: 2.5vh;
+    border-radius: 80vh;
+    height: 5vh;
+    width: 16vh;
+}
+
+#button:hover {
+    /*To make an effect on the buttons when you hover on it*/
+    background-color: #558067;
+    color: white;
+    border-color: rgb(220, 220, 220);
+    font-weight: normal;
+}
+
+
+#bottomPage {
+    /*for bottom the page*/
+    background-color: #558067;
+    font-size: 2vh;
+}
+
+
+#search{
+    
+    height: 5vh;
+    margin: 0 50vh 0 50vh;
+}
