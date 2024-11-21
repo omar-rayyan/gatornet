@@ -72,7 +72,9 @@
 
 
 }
-
+#updatebuttondiv {
+    text-align: center;
+}
 #button:hover {
     /*To make an effect on the buttons when you hover on it*/
     background-color: #558067;

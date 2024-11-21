@@ -18,9 +18,6 @@
 
     <main class="flex justify-center mt-10 flex-grow" id="main">
         <div class="bg-gray-100 rounded-lg shadow-lg w-full max-w-lg" id="mainContainer">
-            <div class="bg-green-700 text-white text-center py-4 rounded-t-lg" id="headerReg">
-                <h2 class="text-xl font-semibold" id="headerCardText">Register</h2>
-            </div>
             <div class="p-6" id="textInReg">
                 <form action="{% url 'register' %}" method="post" class="space-y-4">
                     {% csrf_token %}

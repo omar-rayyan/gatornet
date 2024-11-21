@@ -80,7 +80,7 @@ class LikeManager(models.Manager):
         return True if like else False
 
 class PersonalDetailsManager(models.Manager):
-    def basic_validator(data):
+    def basic_validator(self, data):
         errors = {}
         if len(data['bio']) > 500:
             errors['bio'] = 'Bio must not exceed 500 characters.'
