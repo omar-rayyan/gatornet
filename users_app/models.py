@@ -2,6 +2,8 @@ from django.db import models
 import bcrypt
 import re
 from datetime import datetime
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 
@@ -70,10 +72,21 @@ class UserManager(models.Manager):
         return user
     def get_user(self, id):
         return User.objects.get(id=id)
-
+    def get_full_name(self, user):
+        return f"{user.first_name} {user.last_name}"
+    def search(self, search):
+        return self.annotate(
+            full_name=Concat('first_name', Value(' '), 'last_name')
+        ).filter(
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search) |
+            Q(full_name__icontains=search)
+        )
+    
 class User(models.Model):
     first_name = models.CharField(max_length=45)
     last_name = models.CharField(max_length=45)
+    profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg')
     email = models.CharField(max_length=255)
     password = models.CharField(max_length=255)
     date_of_birth = models.DateField()
@@ -86,3 +99,5 @@ class User(models.Model):
         friendships = Friendship.objects.filter(models.Q(friend_1=self) | models.Q(friend_2=self))
         friends = [friendship.friend_1 if friendship.friend_2 == self else friendship.friend_2 for friendship in friendships]
         return friends
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"

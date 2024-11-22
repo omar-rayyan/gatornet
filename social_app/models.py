@@ -18,11 +18,11 @@ class PostsManager(models.Manager):
         return Post.objects.create(content=data['content'], creator=data['creator'], shared=data['shared'], shared_post_id=data['shared_post_id'])
     def get_user_posts(self, user_id):
         user = User.objects.get(id=user_id)
-        return Post.objects.filter(creator=user)
+        return Post.objects.filter(creator=user).order_by('-created_at')
     def get_friends_posts(self, user_id):
         user = User.objects.get(id=user_id)
         friends = user.friends()
-        return Post.objects.filter(creator__in=friends)
+        return Post.objects.filter(creator__in=list(friends) + [user]).order_by('-created_at')
     def get_post_comments(self, post_id):
         post = Post.objects.get(id=post_id)
         return post.comments
@@ -46,19 +46,36 @@ class CommentManager(models.Manager):
         comment.content = new_content
         comment.save()
     def create_comment(self, data):
-        return Comment.objects.create(content=data['content'], user=data['user'], post=data['post'])
+        Comment.objects.create(content=data['content'], commentor=data['user'], post=data['post'])
 
 class FriendshipManager(models.Manager):
     def create_friendship(self, data):
         return Friendship.objects.create(friend_1=data['friend_1'], friend_2=data['friend_2'])
     def remove_friendship(self, data):
         user_1 = User.objects.get(id=data['user_1'])
-        friendship_1 = Friendship.objects.get(friend_1=user_1)
+        user_2 = User.objects.get(id=data['user_2'])
+        friendship_1 = Friendship.objects.get(friend_1=user_1, friend_2=user_2)
         if friendship_1:
             friendship_1.delete()
         else:
-            friendship_2 = Friendship.objects.get(friend_2=user_1)
+            friendship_2 = Friendship.objects.get(friend_2=user_1, friend_1=user_2)
             friendship_2.delete()
+    def get_user_friends(self, user):
+        friendships = Friendship.objects.filter(friend_1=user) | Friendship.objects.filter(friend_2=user)
+        friends = []
+        for friendship in friendships:
+            if friendship.friend_1 != user:
+                friends.append(friendship.friend_1)
+            if friendship.friend_2 != user:
+                friends.append(friendship.friend_2)
+        friends = list(set(friends))
+        return friends
+    def is_friends_with_user(self, data):
+        user_1 = User.objects.get(id=data['user_1'])
+        user_2 = User.objects.get(id=data['user_2'])
+        if user_1 == user_2:
+            return 'same_user'
+        return True if self.filter(friend_2=user_1, friend_1=user_2).exists() or self.filter(friend_2=user_2, friend_1=user_1).exists() else False
 
 class LikeManager(models.Manager):
     def add_like(self, post_id, user_id):
@@ -74,10 +91,7 @@ class LikeManager(models.Manager):
         post = Post.objects.get(id=post_id)
         return post.likes.count()
     def has_user_liked_post(self, post_id, user_id):
-        post = Post.objects.get(id=post_id)
-        user = User.objects.get(id=user_id)
-        like = Like.objects.get(user=user, post=post)
-        return True if like else False
+        return self.filter(post_id=post_id, user_id=user_id).exists()
 
 class PersonalDetailsManager(models.Manager):
     def basic_validator(self, data):

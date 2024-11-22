@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Post Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% load static %} 
+    {% load custom_filters %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-green-700 p-4 flex items-center" id="navbar">
+      <div class="rounded-full flex items-center justify-center">
+        <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" id="logo" class="h-12 w-12" alt="Logo" /></a>
+      </div>
+      <form action="{% url 'search' %}" method="post">
+        {% csrf_token %}
+        <input type="search" placeholder="Search" name="search" class="flex w-[50vh] p-2 rounded-full border-2 border-gray-600" id="search" />
+        <button type="submit" hidden></button>
+      </form>
+      <div>
+        <a href="{% url 'view_profile' user.id %}" class="text-white px-4 py-2 ml-4 rounded font-bold hover:text-gray-300 transition-colors duration-200">My Profile</a>
+        <button class="text-white bg-green-800 px-4 py-0 ml-4 rounded hover:bg-green-900" id="button">Log Out</button>
+      </div>
+    </header>
+
+      <main class="flex-grow p-3">
+        <div class="max-w-2xl mx-auto mt-[2vh] bg-white rounded-lg shadow-md p-4 w-[90vh]">
+          {% if post.shared %}
+            <p class="text-gray-700 mb-4 border-b pb-[0.7vh] border-gray-600"><span class="font-bold">{{ post.creator.full_name }}</span> shared <span class="font-bold">{% if post.creator == shared_post.creator %} his own post.{% else %} {{ shared_post.creator.full_name }}'s</span> post.{% endif %}</p>
+          {% endif %}
+         <div class="flex items-start">
+          <a href="{% url 'view_profile' post.creator.id %}"><img alt="Profile of user" class="w-12 h-12 rounded-full" height="50" src="{% if post.creator.profile_picture.url %} {{ post.creator.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" width="50"/></a>
+          <div class="ml-4">
+           <div class="flex items-center">
+            <h2 class="font-bold text-lg">
+             <a href="{% url 'view_profile' post.creator.id %}">{% if post.shared %} {{ shared_post.creator.full_name }} {% else %} {{ post.creator.full_name }} {% endif %}</a>
+            </h2>
+            <span class="text-gray-500 ml-2 text-sm">
+              {{ post.created_at|timesince }} ago
+            </span>
+           </div>
+           <p id="post-content-{{ post.id }}" class="mt-2 text-gray-700 text-sm">
+              {{ post.content }}
+            </p>
+            <textarea id="edit-post-content-{{ post.id }}" class="hidden mt-1 text-gray-700 text-sm border-2 border-gray-600" rows="5" cols="50">{{ post.content }}</textarea>
+          </div>
+         </div>
+         <div class="flex items-center justify-between text-gray-700 border-t border-b pt-2 pb-2 mt-[2vh] border-gray-300">
+          <p class="text-sm flex items-center">
+            <span class="font-bold text-green-700 mr-[1vh] like-count">{{ post.likes.count|abbreviate_number }} likes </span> | 
+            <span id="post-comments-count" class="ml-[0.2vh] mr-[0.5vh]">{{ post.comments.count|abbreviate_number }}</span> comments
+            {% if post.creator.id == request.session.user_id %}
+              | <a class="ml-[1vh] hover:text-green-600 cursor-pointer edit-post" data-post-id="{{ post.id }}">
+                <span class="text-gray-500 hover:text-green-600">Edit</span>
+              </a>
+              <a class="hidden save-post-btn hover:text-green-600 cursor-pointer" data-post-id="{{ post.id }}">
+                <span class="ml-[1vh] text-gray-500 hover:text-green-600">Save</span>
+              </a>
+            {% endif %}
+          </p>           
+          <div class="flex items-center space-x-4">
+            <button class="like-btn {% if has_user_liked_post %} text-green-700 {% else %} text-gray-700 hover:text-green-700 {% endif %}" data-post-id="{{ post.id }}">
+              <i class="fas fa-thumbs-up"></i>
+            </button>
+            <form action="{% url 'share_post' %}" method="post">
+                {% csrf_token %}
+                <button class="text-gray-700 hover:text-green-700">
+                    <i class="fas fa-share"></i>
+                </button>
+                <input type="hidden" name="post_id" value="{{ post.id }}">
+                <input type="hidden" name="current_view" value="view_post">
+            </form>
+            {% if post.creator.id == request.session.user_id %}
+                <form action="{% url 'delete_post_view_post_view' %}" method="post" class="inline-flex items-center">
+                    {% csrf_token %}
+                    <button type="submit" class="text-gray-700 hover:text-red-600">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <input type="hidden" name="current_view" value="view_post">
+                </form>
+            {% endif %}
+        </div>        
+        </div>
+         <div class="mt-4">
+          {% for comment in post.comments.all %}
+            <div class="flex items-start mt-[2vh]" id="comment-{{ comment.id }}">
+              <a href="{% url 'view_profile' comment.commentor.id %}">
+                <img alt="Profile of user" class="w-10 h-10 rounded-full" height="50" 
+                  src="{% if comment.commentor.profile_picture.url %} {{ comment.commentor.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" width="50"/>
+              </a>
+              <div class="ml-4">
+                <div class="flex items-center">
+                  <h2 class="font-bold text-sm">
+                    <a href="{% url 'view_profile' comment.commentor.id %}">{{ comment.commentor.first_name }} {{ comment.commentor.last_name }}</a>
+                  </h2>
+                  <span class="text-gray-500 ml-2 text-xs">
+                    {{ comment.created_at|timesince }} ago
+                  </span>
+                </div>
+                
+                <p id="content-{{ comment.id }}" class="mt-1 text-gray-700 text-sm">
+                  {{ comment.content }}
+                </p>
+              
+                <textarea id="edit-content-{{ comment.id }}" class="hidden mt-1 text-gray-700 text-sm border-2 border-gray-600" rows="2" cols="50">{{ comment.content }}</textarea>
+                {% if comment.commentor.id == request.session.user_id %}
+                <div class="flex items-center mt-2 text-gray-500 text-xs">
+                  <button class="mr-[0.2vh] hover:text-green-600 edit-btn" data-id="{{ comment.id }}">
+                    Edit
+                  </button>
+                  | <button class="ml-[0.2vh] text-red-600 hover:text-red-800 delete-btn" data-id="{{ comment.id }}">
+                  Delete
+                </button>
+                  <button class="hidden save-btn hover:text-green-600" data-id="{{ comment.id }}">
+                    Save
+                  </button>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+
+         </div>
+         <form action="{% url 'add_comment' %}" method="post">
+          {% csrf_token %}
+          <div class="mt-4 flex items-center border-t border-gray-300 pt-2">
+              <img alt="Profile of user" class="w-10 h-10 rounded-full" height="50" src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" width="50"/>
+              <input class="ml-4 flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm" placeholder="Adding new comment" type="text" name="content"/>
+              <button class="ml-2 bg-green-700 text-white rounded-full px-4 py-2 text-sm">
+              Post
+              </button>
+              <input type="hidden" name="post_id" value="{{ post.id }}">
+          </div>
+        </form>
+      </main>
+
+        <!-- Footer -->
+        <footer class="bg-green-700 text-white text-center py-4 mt-[2vh]" id="bottomPage">
+          <div class="space-x-4">
+              <a href="#" class="text-blue-300 hover:underline">About Us</a>
+              <span>|</span>
+              <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
+          </div>
+      </footer>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    // Edit Comment
+    $(".edit-btn").click(function () {
+        var commentId = $(this).data('id');
+        var content = $("#content-" + commentId);
+        var editContent = $("#edit-content-" + commentId);
+
+        content.hide();
+        editContent.removeClass("hidden");
+
+        $(this).hide();
+        $(".save-btn[data-id='" + commentId + "']").show();
+    });
+
+    $(".save-btn").click(function () {
+        var commentId = $(this).data('id');
+        var updatedContent = $("#edit-content-" + commentId).val();
+
+        $.ajax({
+            url: "{% url 'edit_comment' %}",
+            method: 'POST',
+            data: {
+                'comment_id': commentId,
+                'content': updatedContent,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    $("#content-" + commentId).text(updatedContent).show();
+                    $("#edit-content-" + commentId).addClass("hidden");
+                    $(".save-btn[data-id='" + commentId + "']").hide();
+                    $(".edit-btn[data-id='" + commentId + "']").show();
+                } else {
+                    alert("Failed to update comment. Error: " + response.error);
+                }
+            },
+            error: function () {
+                alert("An error occurred. Please try again.");
+            }
+        });
+    });
+    $(".delete-btn").click(function () {
+        var commentId = $(this).data('id');
+          $.ajax({
+              url: "{% url 'delete_comment' %}",
+              method: 'POST',
+              data: {
+                  'comment_id': commentId,
+                  'csrfmiddlewaretoken': '{{ csrf_token }}',
+              },
+              success: function (response) {
+                  if (response.success) {
+                      $("#comment-" + commentId).remove();
+                      var currentCommentCount = parseInt($("#post-comments-count").text());
+                      $("#post-comments-count").text(currentCommentCount - 1);
+                  } else {
+                      alert("Failed to delete comment. Error: " + response.error);
+                  }
+              },
+              error: function () {
+                  alert("An error occurred. Please try again.");
+              }
+          });
+    });
+    $(".like-btn").click(function () {
+        var postId = $(this).data('post-id');
+        var likeButton = $(this);
+
+        // Prevent multiple clicks
+        if (likeButton.hasClass('loading')) return;
+        likeButton.addClass('loading');
+
+        // Send AJAX request
+        $.ajax({
+            url: "{% url 'like_post' %}",
+            method: 'POST',
+            data: {
+                'post_id': postId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Update the like count and button state
+                    if (response.liked) {
+                        likeButton.addClass('text-green-700');
+                    } else {
+                        likeButton.removeClass('text-green-700');
+                    }
+
+                    // Update like count
+                    var currentLikeCount = parseInt($(".like-count").text());
+                    $(".like-count").text(response.like_count + " likes");
+
+                } else {
+                    alert("Failed to like/unlike the post.");
+                }
+            },
+            error: function () {
+                alert("An error occurred. Please try again.");
+            },
+            complete: function () {
+                likeButton.removeClass('loading');
+            }
+        });
+    });
+    // Edit Post
+    $(".edit-post").click(function () {
+        var postId = $(this).data('post-id');
+        var content = $("#post-content-" + postId);
+        var editContent = $("#edit-post-content-" + postId);
+
+        content.hide();
+        editContent.removeClass("hidden");
+
+        $(this).addClass("hidden");
+        $(".save-post-btn[data-post-id='" + postId + "']").removeClass("hidden");
+    });
+
+    $(".save-post-btn").click(function () {
+        var postId = $(this).data('post-id');
+        var updatedContent = $("#edit-post-content-" + postId).val();
+
+        $.ajax({
+            url: "{% url 'edit_post' %}",
+            method: 'POST',
+            data: {
+                'post_id': postId,
+                'content': updatedContent,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    // Update the content in the UI
+                    $("#post-content-" + postId).text(updatedContent).show();
+                    $("#edit-post-content-" + postId).addClass("hidden");
+
+                    // Toggle the visibility of buttons
+                    $(".save-post-btn[data-post-id='" + postId + "']").addClass("hidden");
+                    $(".edit-post[data-post-id='" + postId + "']").removeClass("hidden");
+                } else {
+                    alert("Failed to update post. Error: " + response.message);
+                }
+            },
+            error: function () {
+                alert("An error occurred. Please try again.");
+            }
+        });
+    });
+});
+</script>
+</html>
