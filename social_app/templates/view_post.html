@@ -25,7 +25,7 @@
       </form>
       <div>
         <a href="{% url 'view_profile' user.id %}" class="text-white px-4 py-2 ml-4 rounded font-bold hover:text-gray-300 transition-colors duration-200">My Profile</a>
-        <button class="text-white bg-green-800 px-4 py-0 ml-4 rounded hover:bg-green-900" id="button">Log Out</button>
+        <a href="{% url 'logout' %}"><button class="text-white bg-green-800 px-4 py-0 ml-4 rounded hover:bg-green-900" id="button">Log Out</button></a>
       </div>
     </header>
 
