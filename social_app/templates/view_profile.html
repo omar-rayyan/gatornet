@@ -38,7 +38,7 @@
         <!-- Sidebar -->
         <aside class="w-1/4 bg-gray-200 p-4 rounded-lg shadow">
             <div class="text-center">
-                <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile of user" class="h-24 w-24 mx-auto rounded-full border">
+                <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile of user" class="h-24 w-24 mx-auto rounded-full border {% if user.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}">
                 <h2 class="text-2xl font-bold mt-4">{{ user.first_name }} {{ user.last_name }}</h2>
                 <p class="mt-2 text-gray-700">{{ personal_details.bio }}</p>
                 <p class="mt-2 text-gray-700">{{ personal_details.workplace }}</p>
@@ -67,7 +67,7 @@
                     <!-- Friend -->
                     {% for friend in friends %}
                         <div class="friend-container flex items-center bg-white p-2 rounded-lg shadow">
-                            <a href="{% url 'view_profile' friend.id %}"><img src="{% if friend.profile_picture.url %} {{ friend.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile of user" class="h-8 w-8 rounded-full"></a>
+                            <a href="{% url 'view_profile' friend.id %}"><img src="{% if friend.profile_picture.url %} {{ friend.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile of user" class="h-8 w-8 rounded-full {% if friend.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}"></a>
                             <div class="ml-4 text-gray-700 flex-grow">
                                 <a href="{% url 'view_profile' friend.id %}">{{ friend.first_name }} {{ friend.last_name }}</a>
                             </div>
@@ -92,7 +92,7 @@
                     {% csrf_token %}
                     <div class="bg-gray-50 p-4 rounded-lg shadow mb-6">
                     <div class="flex items-center mb-4">
-                        <a href="{% url 'view_profile' user.id %}"><img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-2 border-gray-300" /></a>
+                        <a href="{% url 'view_profile' user.id %}"><img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-4 border-green-700" /></a>
                         <textarea name='content' placeholder="What are you thinking about?" class="ml-4 flex-grow p-2 border rounded-lg focus:border-green-700 focus:outline-none"></textarea>
                     </div>
                     {% for message in messages %}
@@ -112,12 +112,29 @@
             {% for item in posts_with_likes %}
             <div class="bg-gray-50 p-4 rounded-lg shadow mb-6 post-container">
             {% if item.post.shared %}
-                <p class="text-gray-700 mb-4 border-b pb-[0.7vh] border-gray-600"><span class="font-bold">{{ item.post.creator.full_name }}</span> shared <span class="font-bold">{% if item.post.creator == item.shared_post.creator %} his own post.{% else %} {{ item.shared_post.creator.full_name }}'s</span> post.{% endif %}</p>
-            {% endif %}
+                <p class="text-gray-700 mb-4 border-b pb-[0.7vh] border-gray-600"><span class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></span> shared <span class="font-bold">{% if item.post.creator == item.shared_post.creator %} his own post.{% else %} <a href="{% url 'view_profile' item.shared_post.creator.id %}">{{ item.shared_post.creator.full_name }}'s</a></span> post.{% endif %}</p>
+                <div class="flex items-center mb-2">
+                    <a href="{% url 'view_profile' item.shared_post.creator.id %}"><img src="{{ item.shared_post.creator.profile_picture.url }}" alt="Profile" class="h-12 w-12 rounded-full 
+                        {% if item.shared_post.creator.is_online %}
+                            border-4 border-green-700
+                        {% else %}
+                            border-4 border-gray-600
+                        {% endif %}" /></a>
+                {% else %}
             <div class="flex items-center mb-2">
-                <a href="{% url 'view_profile' item.post.creator.id %}"><img src="{% if item.post.shared %} {{ item.shared_post.creator.profile_picture.url }} {% else %} {{ item.post.creator.profile_picture.url }} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-2 border-gray-300" /></a>
+                <a href="{% url 'view_profile' item.post.creator.id %}"><img src="{{ item.post.creator.profile_picture.url }}" alt="Profile" class="h-12 w-12 rounded-full 
+                        {% if item.post.creator.is_online %}
+                            border-4 border-green-700
+                        {% else %}
+                            border-4 border-gray-600
+                        {% endif %}" /></a>
+            {% endif %}
                 <div class="ml-4">
-                <h3 class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{% if item.post.shared %} {{ item.shared_post.creator.full_name }} {% else %} {{ item.post.creator.full_name }} {% endif %}</a></h3>
+                    {% if item.post.shared %}
+                    <h3 class="font-bold"><a href="{% url 'view_profile' item.shared_post.creator.id %}">{{ item.shared_post.creator.full_name }}</a></h3>
+                    {% else %}
+                    <h3 class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></h3>
+                    {% endif %}
                 <p class="text-gray-500 text-sm">{{ item.post.created_at|timesince }} ago</p>
                 </div>
             </div>
@@ -290,6 +307,15 @@
             }
         });
     });    
+    setInterval(() => {
+        fetch('/update_activity/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+        });
+    }, 30000);
 });
 </script>
 </html>

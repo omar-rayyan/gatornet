@@ -2,6 +2,8 @@ from django.db import models
 import bcrypt
 import re
 from datetime import datetime
+from django.utils import timezone
+from datetime import timedelta
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
 
@@ -82,6 +84,14 @@ class UserManager(models.Manager):
             Q(last_name__icontains=search) |
             Q(full_name__icontains=search)
         )
+    def update_user_activity(self, user):
+        user.last_activity = timezone.now()
+        user.save()
+    def is_user_online(self, user):
+        now = timezone.now()
+        if user.last_activity > now - timedelta(minutes=5):
+            return True
+        return False
     
 class User(models.Model):
     first_name = models.CharField(max_length=45)
@@ -91,6 +101,7 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=45)
+    last_activity = models.DateTimeField(default=datetime.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = UserManager()
@@ -101,3 +112,8 @@ class User(models.Model):
         return friends
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+    def is_online(self):
+        now = timezone.now()
+        if self.last_activity > now - timedelta(minutes=5):
+            return True
+        return False

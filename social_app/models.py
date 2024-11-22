@@ -54,8 +54,8 @@ class FriendshipManager(models.Manager):
     def remove_friendship(self, data):
         user_1 = User.objects.get(id=data['user_1'])
         user_2 = User.objects.get(id=data['user_2'])
-        friendship_1 = Friendship.objects.get(friend_1=user_1, friend_2=user_2)
-        if friendship_1:
+        friendship_1 = Friendship.objects.filter(friend_1=user_1, friend_2=user_2)
+        if friendship_1.exists():
             friendship_1.delete()
         else:
             friendship_2 = Friendship.objects.get(friend_2=user_1, friend_1=user_2)
@@ -195,5 +195,6 @@ class Message(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     objects = MessageManager()
+    class Meta:
+        ordering = ['created_at']

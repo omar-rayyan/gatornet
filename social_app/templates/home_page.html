@@ -37,7 +37,7 @@
           {% csrf_token %}
           <div class="bg-gray-50 p-4 rounded-lg shadow mb-6">
             <div class="flex items-center mb-4">
-              <a href="{% url 'view_profile' user.id %}"><img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-2 border-gray-300" /></a>
+              <a href="{% url 'view_profile' user.id %}"><img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-4 border-green-700" /></a>
               <textarea name='content' placeholder="What are you thinking about?" class="ml-4 flex-grow p-2 border rounded-lg focus:border-green-700 focus:outline-none"></textarea>
             </div>
             {% for message in messages %}
@@ -56,12 +56,32 @@
         {% for item in posts_with_likes %}
         <div class="bg-gray-50 p-4 rounded-lg shadow mb-6 post-container">
           {% if item.post.shared %}
-            <p class="text-gray-700 mb-4 border-b pb-[0.7vh] border-gray-600"><span class="font-bold">{{ item.post.creator.full_name }}</span> shared <span class="font-bold">{% if item.post.creator == item.shared_post.creator %} his own post.{% else %} {{ item.shared_post.creator.full_name }}'s</span> post.{% endif %}</p>
-          {% endif %}
+            <p class="text-gray-700 mb-4 border-b pb-[0.7vh] border-gray-600"><span class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></span> shared <span class="font-bold">{% if item.post.creator == item.shared_post.creator %} his own post.{% else %} <a href="{% url 'view_profile' item.shared_post.creator.id %}">{{ item.shared_post.creator.full_name }}'s</a></span> post.{% endif %}</p>
+            <div class="flex items-center mb-2">
+              <a href="{% url 'view_profile' item.shared_post.creator.id %}"><img src="{{ item.shared_post.creator.profile_picture.url }}" alt="Profile" class="h-12 w-12 rounded-full
+                {% if item.shared_post.creator.is_online %}
+                    border-4 border-green-700
+                {% else %}
+                    border-4 border-gray-600
+                {% endif %}
+                " /></a>
+          {% else %}
           <div class="flex items-center mb-2">
-            <a href="{% url 'view_profile' item.post.creator.id %}"><img src="{% if item.post.shared %} {{ item.shared_post.creator.profile_picture.url }} {% else %} {{ item.post.creator.profile_picture.url }} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-2 border-gray-300" /></a>
+            <a href="{% url 'view_profile' item.post.creator.id %}"><img src="{{ item.post.creator.profile_picture.url }}" alt="Profile" class="h-12 w-12 rounded-full
+              {% if item.post.creator.is_online %}
+                  border-4 border-green-700
+                {% else %}
+                  border-4 border-gray-600
+              {% endif %}
+              " /></a>
+          {% endif %}
+          
             <div class="ml-4">
-              <h3 class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{% if item.post.shared %} {{ item.shared_post.creator.full_name }} {% else %} {{ item.post.creator.full_name }} {% endif %}</a></h3>
+              {% if item.post.shared %}
+              <h3 class="font-bold"><a href="{% url 'view_profile' item.shared_post.creator.id %}">{{ item.shared_post.creator.full_name }}</a></h3>
+              {% else %}
+              <h3 class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></h3>
+              {% endif %}
               <p class="text-gray-500 text-sm">{{ item.post.created_at|timesince }} ago</p>
             </div>
           </div>
@@ -95,12 +115,12 @@
       <!-- Right Sidebar -->
       <div class="w-1/4 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
         <h3 class="text-lg font-bold mb-4">Your Friends</h3>
-        <ul>
+        <ul id="friends-list">
           {% for friend in friends %}
-            <li class="flex items-center space-x-4 py-2">
-              <img src="{% if friend.profile_picture.url %} {{ friend.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-10 w-10 rounded-full" />
-              <span class="text-gray-800 font-medium">{{ friend.first_name }} {{ friend.last_name }}</span>
-            </li>
+          <li class="flex items-center space-x-4 py-2 cursor-pointer friend-item" data-id="{{ friend.id }}">
+            <img src="{% if friend.profile_picture.url %}{{ friend.profile_picture.url }}{% else %}{% static 'imgs/default-profile.png' %}{% endif %}" alt="Profile" class="h-10 w-10 rounded-full {% if friend.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}" />
+            <span class="text-gray-800 font-medium">{{ friend.full_name }}</span>
+          </li>
           {% empty %}
             <li class="text-gray-500">No friends yet.</li>
           {% endfor %}
@@ -108,6 +128,8 @@
       </div>
     </main>
 
+    <!-- Chat Window Container -->
+    <div id="chat-windows" class="fixed bottom-0 right-0 flex flex-row flex-wrap space-x-2 p-4 z-50 mr-[50vh]"></div>
 
     <!-- Footer -->
     <footer class="bg-green-700 text-white text-center py-4" id="bottomPage">
@@ -121,6 +143,106 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     $(document).ready(function () {
+      const friendsList = document.getElementById('friends-list');
+  const chatWindowsContainer = document.getElementById('chat-windows');
+
+  friendsList.addEventListener('click', async (e) => {
+    const friendItem = e.target.closest('.friend-item');
+    if (friendItem) {
+        const friendId = friendItem.getAttribute('data-id');
+        const friendName = friendItem.querySelector('span').textContent;
+        const friendImg = friendItem.querySelector('img').src;
+        const currentUserId = "{{ user.id }}";
+
+        // Check if chat window for this friend already exists
+        if (!document.querySelector(`#chat-window-${friendId}`)) {
+            const chatWindow = document.createElement('div');
+            chatWindow.id = `chat-window-${friendId}`;
+            chatWindow.className = 'bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-[20rem]';
+            chatWindow.innerHTML = `
+                <div class="flex justify-between items-center border-b pb-2 mb-2">
+                    <div class="flex justify-between items-center">
+                      <a href="/social/profile/${friendId}"><img src="${friendImg}" alt="Profile" class="h-10 w-10 rounded-full mr-[1vh]" /></a>
+                      <a href="/social/profile/${friendId}"><h4 class="font-bold text-gray-800">${friendName}</h4></a>
+                    </div>
+                    <button class="close-chat text-gray-600">&times;</button>
+                </div>
+                <div class="chat-messages overflow-y-auto h-[15rem] border-b mb-2"></div>
+                <form class="chat-form flex items-center space-x-2">
+                    <input type="text" class="chat-input flex-1 border border-gray-300 rounded-lg p-2" placeholder="Type a message..." />
+                </form>
+            `;
+
+            chatWindowsContainer.appendChild(chatWindow);
+
+            const chatMessages = chatWindow.querySelector('.chat-messages');
+
+            // Fetch existing messages
+            try {
+                const response = await fetch(`/get_messages/${friendId}/`);
+                const data = await response.json();
+                if (data.messages) {
+                    data.messages.forEach(msg => {
+                        const msgDiv = document.createElement('div');
+                        const isSender = msg.sender == currentUserId;
+                        // Compare msg.sender with currentUserId instead of using Django template tag in JS
+                        if(msg.sender == currentUserId) {
+                          var senderName = "You";
+                        } else {
+                          var senderName = friendName;
+                        };
+                        msgDiv.textContent = `${senderName}: ${msg.content}`;
+                        msgDiv.className = `my-2 p-2 rounded-lg max-w-xs break-words ${isSender ? 'bg-green-700 text-white self-end' : 'bg-gray-200 text-gray-800'}`;
+                        chatMessages.appendChild(msgDiv);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    });
+                }
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+
+            // Close chat window
+            chatWindow.querySelector('.close-chat').addEventListener('click', () => {
+                chatWindow.remove();
+            });
+
+            // Handle sending messages
+            const form = chatWindow.querySelector('.chat-form');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const message = form.querySelector('.chat-input').value;
+                if (message.trim() !== '') {
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = `You: ${message}`;
+                    messageElement.className = 'my-2 p-2 rounded-lg max-w-xs break-words bg-green-700 text-white self-end';
+                    chatMessages.appendChild(messageElement);
+                    form.querySelector('.chat-input').value = '';
+
+                    // Optionally, send the message to the server
+                    fetch(`/send_message/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ receiver: friendId, content: message })
+                    });
+                }
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+    }
+});
+setInterval(() => {
+    fetch('/update_activity/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+    });
+}, 30000);
     $(".like-btn").click(function () {
         var postId = $(this).data('post-id');
         var likeButton = $(this);

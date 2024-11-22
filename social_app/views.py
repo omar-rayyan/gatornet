@@ -3,6 +3,8 @@ from social_app.models import *
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.files.storage import FileSystemStorage
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 def root(request):
     return redirect('home')
@@ -96,8 +98,23 @@ def view_profile(request, id):
     }
     return render(request, 'view_profile.html', context)
 
+def get_messages(request, friend_id):
+    recipient = User.objects.get(id=friend_id)
+    user_id = request.session['user_id']
+    sender = User.objects.get_user(user_id)
+    from django.db.models import Q
+    messages = Message.objects.filter(
+        (Q(sender=sender) & Q(recipient=recipient)) |
+        (Q(sender=recipient) & Q(recipient=sender))
+    ).order_by('created_at')
+    message_data = [
+        {'sender': message.sender.id, 'content': message.content, 'created_at': message.created_at.strftime('%Y-%m-%d %H:%M')}
+        for message in messages
+    ]
+    return JsonResponse({'messages': message_data})
+
 def like_post(request):
-    if request.method == 'POST' and request.is_ajax():
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         post_id = request.POST.get('post_id')
         user_id = request.session.get('user_id')
 
@@ -218,22 +235,25 @@ def delete_comment(request):
     comment.delete()
     return JsonResponse({'success': True, 'message': 'Comment deleted successfully.'})
 
+@csrf_exempt
 def send_message(request):
     if request.method == 'POST':
-        if not 'user_id' in request.session:
-            messages.error(request, 'You must first login.', extra_tags='login')
-            return redirect('/')
-        sender_id = request.session['user_id']
-        recipient_id = request.POST['recipient_id']
-        content = request.POST['content']
-        errors = Message.objects.basic_validator({'content': content})
-        if errors:
-            for key, value in errors.items():
-                messages.error(request, value, extra_tags='message')
-            return redirect('home')
-        Message.objects.send_message({'sender_id': sender_id, 'recipient_id': recipient_id, 'content': content})
-        return redirect('home')
-    return redirect('home')
+        data = json.loads(request.body)
+        recipient = User.objects.get(id=int(data['receiver']))
+        user_id = request.session['user_id']
+        sender = User.objects.get_user(user_id)
+        Message.objects.create(
+            sender=sender,
+            recipient=recipient,
+            content=data['content']
+        )
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+def update_activity(request):
+    user = User.objects.get(id=int(request.session['user_id']))
+    User.objects.update_user_activity(user)
+    return JsonResponse({'status': 'success'})
 
 def view_messages(request, friend_id):
     if not 'user_id' in request.session:
@@ -265,7 +285,7 @@ def remove_friend(request):
         if not 'user_id' in request.session:
             messages.error(request, 'You must first login.', extra_tags='login')
             return redirect('/')
-        if request.is_ajax():
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             friend_id = request.POST.get('friend_id')
             user = User.objects.get(id=request.session['user_id'])
             friend = User.objects.get(id=friend_id)
@@ -335,7 +355,7 @@ def edit_post(request):
     if post.creator.id != int(request.session['user_id']):
         messages.error(request, 'You cannot edit a post that you did not create.', extra_tags='edit_post')
         return redirect('view_post', id=post_id)
-    if request.method == 'POST' and request.is_ajax():
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         content = request.POST.get('content')
         if content:
             post.content = content

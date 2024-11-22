@@ -13,6 +13,7 @@ urlpatterns = [
     path('add_friend', views.add_friend, name='add_friend'),
     path('remove_friend', views.remove_friend, name='remove_friend'),
     path('search_user', views.search_user, name='search'),
+    path('update_activity', views.update_activity, name='update_activity'),
     path('search_results', views.view_search_results, name='search_results'),
     path('edit_comment', views.edit_comment, name='edit_comment'),
     path('delete_post', views.delete_post, name='delete_post'),
@@ -22,4 +23,6 @@ urlpatterns = [
     path('like_post', views.like_post, name='like_post'),
     path('comment_on_post', views.view_post, name='comment_on_post'),
     path('share_post', views.share_post, name='share_post'),
+    path('get_messages/<int:friend_id>/', views.get_messages, name='get_messages'),
+    path('send_message/', views.send_message, name='send_message'),
 ]

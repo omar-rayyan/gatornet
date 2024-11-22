@@ -91,20 +91,6 @@
             </div>
         </form>
     </div>
-        <!-- Right Sidebar -->
-        <div class="w-1/4 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
-            <h3 class="text-lg font-bold mb-4">Your Friends</h3>
-            <ul>
-            {% for friend in friends %}
-                <li class="flex items-center space-x-4 py-2">
-                <img src="{% if friend.profile_picture.url %} {{ friend.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-10 w-10 rounded-full" />
-                <span class="text-gray-800 font-medium">{{ friend.first_name }} {{ friend.last_name }}</span>
-                </li>
-            {% empty %}
-                <li class="text-gray-500">No friends yet.</li>
-            {% endfor %}
-            </ul>
-        </div>
     </main>
 
     <!-- Footer -->
@@ -115,7 +101,17 @@
             <span class="text-[1.8vh]">&copy; 2024 GatorNet. All Rights Reserved.</span>
         </div>
     </footer>
-
+<script>
+    setInterval(() => {
+        fetch('/update_activity/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+        });
+    }, 30000);
+</script>
 </body>
 
 </html>
