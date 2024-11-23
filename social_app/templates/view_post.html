@@ -20,7 +20,7 @@
       </div>
       <form action="{% url 'search' %}" method="post">
         {% csrf_token %}
-        <input type="search" placeholder="Search" name="search" class="flex w-[50vh] p-2 rounded-full border-2 border-gray-600" id="search" />
+        <input type="search" placeholder="Search for users..." name="search" class="flex w-[50vh] p-2 rounded-full border-2 border-gray-600" id="search" />
         <button type="submit" hidden></button>
       </form>
       <div>

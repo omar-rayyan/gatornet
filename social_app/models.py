@@ -148,9 +148,32 @@ class MessageManager(models.Manager):
         ]
         return messages_dictionary
     
+class FriendRequestManager(models.Manager):
+    def create_friend_request(self, data):
+        return FriendRequest.objects.create(sender=data['sender'], recipient=data['recipient'])
+    def remove_friend_request(self, data):
+        friend_request = FriendRequest.objects.filter(sender=data['sender'], recipient=data['recipient'])
+        if friend_request.exists():
+            friend_request.delete()
+    def accept_friend_request(self, data):
+        friend_request = FriendRequest.objects.filter(sender=data['sender'], recipient=data['recipient'])
+        if friend_request.exists():
+            friend_request.delete()
+        Friendship.objects.create_friendship({'friend_1': data['sender'], 'friend_2': data['recipient']})
+    def get_friend_requests(self, user):
+        return FriendRequest.objects.filter(recipient=user)
+    def has_sent_a_friend_request_to_user(self, data):
+        user_1 = data['user']
+        user_2 = data['other_user']
+        return True if self.filter(sender=user_1, recipient=user_2).exists() else False
+    def has_received_a_friend_request_from_user(self, data):
+        user_1 = data['user']
+        user_2 = data['other_user']
+        return True if self.filter(sender=user_1, recipient=user_2).exists() else False
+
 class Post(models.Model):
     content = models.TextField()
-    creator = models.ForeignKey(User, related_name = "all_posts", on_delete = models.CASCADE)
+    creator = models.ForeignKey(User, related_name = "all_posts", on_delete = models.DO_NOTHING)
     shared = models.BooleanField(default=False)
     shared_post_id = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -159,28 +182,34 @@ class Post(models.Model):
 
 class Comment(models.Model):
     content = models.TextField()
-    commentor = models.ForeignKey(User, related_name = "posted_comments", on_delete = models.CASCADE)
-    post = models.ForeignKey(Post, related_name = "comments", on_delete = models.CASCADE)
+    commentor = models.ForeignKey(User, related_name = "posted_comments", on_delete = models.DO_NOTHING)
+    post = models.ForeignKey(Post, related_name = "comments", on_delete = models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = CommentManager()
 
 class Like(models.Model):
-    user = models.ForeignKey(User, related_name = "liked_posts", on_delete = models.CASCADE)
-    post = models.ForeignKey(Post, related_name = "likes", on_delete = models.CASCADE)
+    user = models.ForeignKey(User, related_name = "liked_posts", on_delete = models.DO_NOTHING)
+    post = models.ForeignKey(Post, related_name = "likes", on_delete = models.DO_NOTHING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = LikeManager()
 
 class Friendship(models.Model):
-    friend_1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="friendships_initiated")
-    friend_2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="friendships_received")
+    friend_1 = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="friendships_initiated")
+    friend_2 = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="friendships_received")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = FriendshipManager()
 
+class FriendRequest(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="friend_requests_sent")
+    recipient = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="friend_requests_received")
+    created_at = models.DateTimeField(auto_now_add=True)
+    objects = FriendRequestManager()
+
 class PersonalDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="personal_details")
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="personal_details")
     bio = models.TextField()
     location = models.TextField()
     workplace = models.TextField()
@@ -191,8 +220,8 @@ class PersonalDetails(models.Model):
     objects = PersonalDetailsManager()
 
 class Message(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
+    sender = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="sent_messages")
+    recipient = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="received_messages")
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     objects = MessageManager()

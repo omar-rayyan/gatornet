@@ -19,7 +19,7 @@
       </div>
       <form action="{% url 'search' %}" method="post">
         {% csrf_token %}
-        <input type="search" placeholder="Search" name="search" class="flex w-[50vh] p-2 rounded-full border-2 border-gray-600" id="search" />
+        <input type="search" placeholder="Search for users..." name="search" class="flex w-[50vh] p-2 rounded-full border-2 border-gray-600" id="search" />
         <button type="submit" hidden></button>
       </form>
       <div>
@@ -119,11 +119,53 @@
 
       <!-- Right Sidebar -->
       <div class="w-1/4 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
+        <!-- Friend Requests Section -->
+        {% if has_friend_requests %}
+        <h3 class="text-lg font-bold mb-4">Friend Requests</h3>
+        <ul id="friend-requests-list" class="mb-6">
+          {% for request in friend_requests %}
+          <li class="flex items-center justify-between space-x-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md p-2">
+            <div class="flex items-center space-x-4">
+              <a href="{% url 'view_profile' request.sender.id %}"><img src="{% if request.sender.profile_picture.url %}{{ request.sender.profile_picture.url }}{% else %}{% static 'imgs/default-profile.png' %}{% endif %}" 
+                  alt="Profile" 
+                  class="h-10 w-10 rounded-full {% if request.sender.is_online %}
+                  border-4 border-green-700
+              {% else %}
+                  border-4 border-gray-600
+              {% endif %}" /></a>
+              <span class="text-gray-800 font-medium"><a href="{% url 'view_profile' request.sender.id %}">{{ request.sender.full_name }}</a></span>
+            </div>
+            <div class="flex space-x-3">
+              <form action="{% url 'respond_to_friend_request' %}" method="post">
+                {% csrf_token %}
+                <button class="text-green-600 hover:text-green-800" aria-label="Accept">
+                  <i class="fas fa-check-circle text-4xl"></i>
+                </button>
+                <input type="hidden" name="sender_id" value="{{ request.sender.id }}">
+                <input type="hidden" name="response" value="accept">
+              </form>
+              <form action="{% url 'respond_to_friend_request' %}" method="post">
+                {% csrf_token %}
+                <button class="text-red-600 hover:text-red-800" aria-label="Decline">
+                  <i class="fas fa-times-circle text-4xl"></i>
+                </button>
+                <input type="hidden" name="sender_id" value="{{ request.sender.id }}">
+                <input type="hidden" name="response" value="decline">
+              </div>
+            </form> 
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Your Friends Section -->
         <h3 class="text-lg font-bold mb-4">Your Friends</h3>
         <ul id="friends-list">
           {% for friend in friends %}
           <li class="flex items-center space-x-4 py-2 cursor-pointer friend-item" data-id="{{ friend.id }}">
-            <img src="{% if friend.profile_picture.url %}{{ friend.profile_picture.url }}{% else %}{% static 'imgs/default-profile.png' %}{% endif %}" alt="Profile" class="h-10 w-10 rounded-full {% if friend.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}" />
+            <img src="{% if friend.profile_picture.url %}{{ friend.profile_picture.url }}{% else %}{% static 'imgs/default-profile.png' %}{% endif %}" 
+                alt="Profile" 
+                class="h-10 w-10 rounded-full {% if friend.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}" />
             <span class="text-gray-800 font-medium">{{ friend.full_name }}</span>
           </li>
           {% empty %}
@@ -183,26 +225,32 @@
             const chatMessages = chatWindow.querySelector('.chat-messages');
 
 
-          const messagesInterval = setInterval(async() => {
-              try {
-                const response = await fetch(`/get_messages/${friendId}/`);
-                const data = await response.json();
-                if (data.messages) {
-                    data.messages.forEach(msg => {
-                        const msgDiv = document.createElement('div');
-                        const isSender = msg.sender == currentUserId;
-                        // Compare msg.sender with currentUserId instead of using Django template tag in JS
-                        msgDiv.textContent = `${msg.content}`;
-                        msgDiv.className = `my-2 p-2 rounded-lg max-w-xs break-words ${isSender ? 'bg-green-700 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'}`;
-                        chatMessages.appendChild(msgDiv);
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    });
+            let lastMessagesLength = 0;
+
+            const messagesInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/get_messages/${friendId}/`);
+                    const data = await response.json();
+                    if (data.messages && data.messages.length > 0) {
+                        if (data.messages.length !== lastMessagesLength) {
+                            chatMessages.innerHTML = '';
+                            
+                            data.messages.forEach(msg => {
+                                const msgDiv = document.createElement('div');
+                                const isSender = msg.sender == currentUserId;
+                                msgDiv.textContent = `${msg.content}`;
+                                msgDiv.className = `my-2 p-2 rounded-lg max-w-xs break-words ${isSender ? 'bg-green-700 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'}`;
+                                chatMessages.appendChild(msgDiv);
+                            });
+
+                            lastMessagesLength = data.messages.length;
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching messages:', error);
                 }
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-            }
-          }, 1000);
+            }, 1000);
 
             // Fetch existing messages
             try {

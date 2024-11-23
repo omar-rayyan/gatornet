@@ -33,10 +33,13 @@ def home(request):
             if shared_post:
                 post_data['shared_post'] = shared_post
         posts_with_likes.append(post_data)
+    friend_requests = FriendRequest.objects.get_friend_requests(user)
     context = {
         'posts_with_likes': posts_with_likes,
         'user': user,
         'friends': friends,
+        'has_friend_requests': friend_requests.exists(),
+        'friend_requests': friend_requests,
     }
     return render(request, 'home_page.html', context)
 
@@ -78,6 +81,7 @@ def view_profile(request, id):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
         return redirect('/')
+    current_user = User.objects.get_user(int(request.session['user_id']))
     user = User.objects.get_user(id)
     personal_detials = PersonalDetails.objects.get(user=user)
     friends = Friendship.objects.get_user_friends(user)
@@ -101,6 +105,8 @@ def view_profile(request, id):
         'personal_details': personal_detials,
         'is_friends_with_user': is_friends_with_user,
         'friends_count': len(friends),
+        'has_sent_a_friend_request_to_user': FriendRequest.objects.has_sent_a_friend_request_to_user({'user': current_user, 'other_user': user}),
+        'has_received_a_friend_request_from_user': FriendRequest.objects.has_received_a_friend_request_from_user({'user': user, 'other_user': current_user}),
     }
     return render(request, 'view_profile.html', context)
 
@@ -282,8 +288,37 @@ def add_friend(request):
         friend_id = int(request.POST['friend_id'])
         user = User.objects.get(id=int(request.session['user_id']))
         friend = User.objects.get(id=friend_id)
-        Friendship.objects.create_friendship({'friend_1': user, 'friend_2': friend})
+        FriendRequest.objects.create_friend_request({'sender': user, 'recipient': friend})
         return redirect('view_profile', id=friend_id)
+    return redirect('home')
+
+def cancel_friend_request(request):
+    if request.method == 'POST':
+        if not 'user_id' in request.session:
+            messages.error(request, 'You must first login.', extra_tags='login')
+            return redirect('/')
+        friend_id = int(request.POST['sender_id'])
+        user = User.objects.get(id=int(request.session['user_id']))
+        friend = User.objects.get(id=friend_id)
+        FriendRequest.objects.remove_friend_request({'sender': user, 'recipient': friend})
+        return redirect('view_profile', id=friend_id)
+    return redirect('home')
+
+def respond_to_friend_request(request):
+    if request.method == 'POST':
+        if not 'user_id' in request.session:
+            messages.error(request, 'You must first login.', extra_tags='login')
+            return redirect('/')
+        friend_id = int(request.POST['sender_id'])
+        user = User.objects.get(id=int(request.session['user_id']))
+        friend = User.objects.get(id=friend_id)
+        if request.POST['response'] == 'accept':
+            FriendRequest.objects.accept_friend_request({'sender': friend, 'recipient': user})
+        else:
+            FriendRequest.objects.remove_friend_request({'sender': friend, 'recipient': user})
+        redirect_target = 'view_profile' if request.POST.get('current_view') == 'view_profile' else 'home'
+        profile_id = friend_id if request.POST.get('current_view') == 'view_profile' else 0
+        return redirect(redirect_target, id=profile_id) if redirect_target == 'view_profile' else redirect(redirect_target)
     return redirect('home')
 
 def remove_friend(request):
@@ -450,8 +485,8 @@ def add_friend_qr(request, user_id):
     try:
         friend_user = User.objects.get(id=user_id)
         current_user = User.objects.get(id=current_user_id)
-        Friendship.objects.create_friendship({'friend_1': friend_user, 'friend_2': current_user})
-        messages.success(request, f"You are now friends with {friend_user.first_name} {friend_user.last_name}!", extra_tags='success')
+        FriendRequest.objects.create_friend_request({'recipient': friend_user, 'sender': current_user})
+        messages.success(request, f"A friend request has been sent to {friend_user.first_name} {friend_user.last_name}!", extra_tags='success')
     except User.DoesNotExist:
         messages.error(request, "User not found.", extra_tags='error')
     return redirect('home')
