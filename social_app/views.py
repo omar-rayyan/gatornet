@@ -11,6 +11,9 @@ import json
 def root(request):
     return redirect('home')
 
+def about_us(request):
+    return render(request, 'about_us.html')
+
 def home(request):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
