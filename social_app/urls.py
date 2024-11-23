@@ -25,4 +25,6 @@ urlpatterns = [
     path('share_post', views.share_post, name='share_post'),
     path('get_messages/<int:friend_id>/', views.get_messages, name='get_messages'),
     path('send_message/', views.send_message, name='send_message'),
+    path('generate_qr_code/<int:user_id>/', views.generate_qr_code, name='generate_qr_code'),
+    path('add-friend-qr/<int:user_id>/', views.add_friend_qr, name='add_friend_qr'),
 ]

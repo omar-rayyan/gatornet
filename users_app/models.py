@@ -66,6 +66,39 @@ class UserManager(models.Manager):
                     errors["password"] = "Incorrect password."
                     return errors
         return errors
+    def update_data_validator(self, postData):
+        errors = {}
+        if len(postData['first_name']) < 2:
+            errors["first_name"] = "First name should be at least 2 characters, no special characters allowed."
+            return errors
+        if len(postData['last_name']) < 2:
+            errors["last_name"] = "Last name should be at least 2 characters, no special characters allowed."
+            return errors
+        if len(postData['email']) < 1:
+            errors["email"] = "Please provide an email address."
+            return errors
+        if not EMAIL_REGEX.match(postData['email']):
+            errors["email"] = "The email address you've entered is invalid."
+            return errors
+        user = postData['user']
+        existing_email = User.objects.filter(email=postData['email']).exclude(id=postData.get('id'))
+        if existing_email.exists():
+            errors["email"] = "This email address was already used before. Please use a different email address."
+            return errors
+        if len(postData['current_password']) > 1 or len(postData['new_password']) > 1 or len(postData['confirm_new_password']) > 1:
+            if len(postData['current_password']) < 8:
+                errors["current_password"] = "Please enter your current password."
+                return errors
+            if len(postData['new_password']) < 8:
+                errors["new_password"] = "Your new password should at least be 8 characters."
+                return errors
+            if postData['new_password'] != postData['confirm_new_password']:
+                errors["new_password"] = "New password confirmation does not match."
+                return errors
+            if not bcrypt.checkpw(postData['current_password'].encode(), user.password.encode()):
+                errors["current_password"] = "Incorrect current password."
+                return errors
+        return errors
     def create_user(self, postData):
         from social_app.models import PersonalDetails
         hashed_password = bcrypt.hashpw(postData['password'].encode(), bcrypt.gensalt()).decode()
@@ -92,6 +125,15 @@ class UserManager(models.Manager):
         if user.last_activity > now - timedelta(minutes=5):
             return True
         return False
+    def update_user_data(self, data):
+        user = data['user']
+        user.first_name = data['first_name']
+        user.last_name = data['last_name']
+        user.email = data['email']
+        if len(data['new_password']) >= 8:
+            new_hashed_password = bcrypt.hashpw(data['new_password'].encode(), bcrypt.gensalt()).decode()
+            user.password = new_hashed_password
+        user.save()
     
 class User(models.Model):
     first_name = models.CharField(max_length=45)

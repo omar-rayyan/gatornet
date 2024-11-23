@@ -60,11 +60,13 @@
              <a href="{% url 'view_profile' post.creator.id %}">{{ post.creator.full_name }}</a>
             {% endif %}
             </h2>
-            <span class="text-gray-500 ml-2 text-sm">
-              {{ post.created_at|timesince }} ago
-            </span>
            </div>
-           <p id="post-content-{{ post.id }}" class="mt-2 text-gray-700 text-sm">
+           <div>
+           <span class="text-gray-500 text-sm">
+            {{ post.created_at|time_ago }}
+          </span>
+        </div>
+           <p id="post-content-{{ post.id }}" class="mt-2 text-gray-700 text-md">
               {{ post.content }}
             </p>
             <textarea id="edit-post-content-{{ post.id }}" class="hidden mt-1 text-gray-700 text-sm border-2 border-gray-600" rows="5" cols="50">{{ post.content }}</textarea>
@@ -120,7 +122,7 @@
                     <a href="{% url 'view_profile' comment.commentor.id %}">{{ comment.commentor.first_name }} {{ comment.commentor.last_name }}</a>
                   </h2>
                   <span class="text-gray-500 ml-2 text-xs">
-                    {{ comment.created_at|timesince }} ago
+                    {{ comment.created_at|time_ago }}
                   </span>
                 </div>
                 
@@ -149,9 +151,9 @@
          </div>
          <form action="{% url 'add_comment' %}" method="post">
           {% csrf_token %}
-          <div class="mt-4 flex items-center border-t border-gray-300 pt-2">
+          <div class="mt-4 flex items-center {% if post.comments.count > 0 %} border-t {% endif %} border-gray-300 pt-2">
               <img alt="Profile of user" class="w-10 h-10 rounded-full border-4 border-green-700" height="50" src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" width="50"/>
-              <input class="ml-4 flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm" placeholder="Adding new comment" type="text" name="content"/>
+              <input class="ml-4 flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm" placeholder="Type your thoughts..." type="text" name="content"/>
               <button class="ml-2 bg-green-700 text-white rounded-full px-4 py-2 text-sm">
               Post
               </button>
@@ -161,7 +163,7 @@
       </main>
 
         <!-- Footer -->
-        <footer class="bg-green-700 text-white text-center py-4 mt-[2vh]" id="bottomPage">
+        <footer class="bg-green-700 text-white text-center py-4 mt-[3vh]" id="bottomPage">
           <div class="space-x-4">
               <a href="#" class="text-blue-300 hover:underline">About Us</a>
               <span>|</span>
@@ -327,7 +329,7 @@
               'X-CSRFToken': '{{ csrf_token }}'
           },
       });
-  }, 30000);
+  }, 10000);
 });
 </script>
 </html>

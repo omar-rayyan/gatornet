@@ -19,23 +19,29 @@
                 <img src="{% static 'img/logo.png' %}" id="logo" class="h-[6vh] w-[6vh]" alt="Logo">
             </a>
         </div>
+        <div class="w-[25vh]"></div>
         <h1 class="text-white text-[4vh] ml-auto font-bold">Edit Profile</h1>
         <div class="ml-auto">
-
+            <a href="{% url 'view_profile' request.session.user_id %}" class="text-white px-4 py-2 ml-4 rounded font-bold hover:text-gray-300 transition-colors duration-200">My Profile</a>
             <a href="{% url 'logout' %}"><button class="text-white px-[2vh] py-[0vh] mr-[3vh]" id="button">Log Out</button></a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex flex-grow">
+    <main class="flex flex-grow mt-[2vh]">
         <!-- Left Content -->
         <div class="w-[150vh] mx-auto bg-white shadow-md rounded-lg p-[3.5vh]">
+            {% for message in messages %}
+              {% if 'edit_profile' in message.tags %}
+                <p class="text-red-500 text-sm font-medium mb-[2vh]" id="message-error">{{ message }}</p>
+              {% endif %}
+            {% endfor %}
         <form action='{% url "edit_profile" %}' method="post" class="grid grid-cols-2 gap-[3vh]" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="flex items-center mb-[2vh]">
                 <!-- Profile Picture -->
                 <div class="relative">
-                    <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-[10vh] w-[10vh] rounded-full border-[0.3vh] border-gray-300">
+                    <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-[10vh] w-[10vh] rounded-full border-4 border-green-700">
                     <input id="profile-pic" type="file" class="hidden">
                 </div>
                 <h2 class="text-[2.2vh] font-bold ml-[2vh]">{{ user.full_name }}</h2>
@@ -52,7 +58,7 @@
             </div>
             <!-- Add Phone -->
             <div>
-                <label class="block text-gray-700 font-medium text-[1.8vh]">Add Phone Number:</label>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Phone Number:</label>
                 <input type="text" placeholder="Phone Number" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="phone_number" value="{{ personal_details.phone_number }}">
             </div>
             <div>
@@ -63,10 +69,14 @@
                 <label class="block text-gray-700 font-medium text-[1.8vh]">Workplace:</label>
                 <input type="text" placeholder="Workplace" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="workplace" value="{{ personal_details.workplace }}">
             </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Location:</label>
+                <input type="text" placeholder="Location" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="location" value="{{ personal_details.location }}">
+            </div>
             <!-- Add Bio -->
             <div class="col-span-2">
-                <label class="block text-gray-700 font-medium text-[1.8vh]">Add Bio:</label>
-                <textarea placeholder="Add a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="bio">{{ personal_details.bio }}</textarea>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Bio:</label>
+                <textarea placeholder="Type a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="bio">{{ personal_details.bio }}</textarea>
             </div>
             <!-- Change Password -->
             <div>
@@ -94,7 +104,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-green-700 text-white text-center py-[2vh]" id="bottomPage">
+    <footer class="bg-green-700 text-white text-center py-[2vh] mt-[3vh]" id="bottomPage">
         <div class="space-x-[2vh]">
             <a href="#" class="text-blue-300 hover:underline text-[1.8vh]">About Us</a>
             <span>|</span>
@@ -110,7 +120,7 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
         });
-    }, 30000);
+    }, 10000);
 </script>
 </body>
 

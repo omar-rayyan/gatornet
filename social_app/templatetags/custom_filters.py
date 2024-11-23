@@ -1,5 +1,6 @@
 from django import template
-from datetime import datetime, timedelta
+from datetime import timedelta, datetime
+from django.utils.timezone import now
 
 register = template.Library()
 
@@ -15,14 +16,15 @@ def abbreviate_number(value):
             return str(value)
     except (ValueError, TypeError):
         return value
-
+    
+@register.filter
 def time_ago(value):
-    now = datetime.now()
+    current_time = now()
     if isinstance(value, datetime):
-        diff = now - value
+        diff = current_time - value
 
         if diff < timedelta(minutes=1):
-            return f"{int(diff.total_seconds())}s ago"
+            return "Just now"
         elif diff < timedelta(hours=1):
             return f"{int(diff.total_seconds() // 60)}m ago"
         elif diff < timedelta(days=1):

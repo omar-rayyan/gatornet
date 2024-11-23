@@ -38,7 +38,21 @@
         <!-- Sidebar -->
         <aside class="w-1/4 bg-gray-200 p-4 rounded-lg shadow">
             <div class="text-center">
-                <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile of user" class="h-24 w-24 mx-auto rounded-full border {% if user.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}">
+                <div class="relative inline-block">
+                    <!-- Profile Picture -->
+                    <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" 
+                         alt="Profile of user" 
+                         class="h-24 w-24 mx-auto rounded-full border {% if user.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}">
+                
+                    <!-- QR Code Icon -->
+                    <a href="{% url 'generate_qr_code' user.id %}" 
+                        target="_blank"
+                       class="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow h-8 w-8 flex items-center justify-center">
+                        <i class="fas fa-qrcode text-green-700 text-lg"></i>
+                    </a>
+                </div>
+                
+                
                 <h2 class="text-2xl font-bold mt-4">{{ user.first_name }} {{ user.last_name }}</h2>
                 <p class="mt-2 text-gray-700">{{ personal_details.bio }}</p>
                 <p class="mt-2 text-gray-700">{{ personal_details.workplace }}</p>
@@ -58,11 +72,11 @@
                         <button class="text-white" id="friendbutton">Remove Friend</button>
                     </form>
                 {% else %}
-                    <p class="font-bold italic">You</p>
+                    <p class="font-bold italic mt-[1vh]">This is You</p>
                 {% endif %}
             </div>
             <div class="mt-6">
-                <h3 class="text-lg font-bold text-green-700">Friends</h3>
+                <h3 class="text-lg font-bold text-green-700">Friends (<span class="text-black">{{ friends_count }}</span>)</h3>
                 <div class="space-y-4 mt-4">
                     <!-- Friend -->
                     {% for friend in friends %}
@@ -135,7 +149,7 @@
                     {% else %}
                     <h3 class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></h3>
                     {% endif %}
-                <p class="text-gray-500 text-sm">{{ item.post.created_at|timesince }} ago</p>
+                <p class="text-gray-500 text-sm">{{ item.post.created_at|time_ago }}</p>
                 </div>
             </div>
             <p class="text-gray-700 mb-4"><a href="{% url 'view_post' item.post.id %}">{{ item.post.content }}</a></p>
@@ -171,6 +185,15 @@
         </section>
 
     </main>
+    <!-- Footer -->
+    <footer class="bg-green-700 text-white text-center py-4 mt-[3vh]" id="bottomPage">
+        <div class="space-x-4">
+          <a href="#" class="text-blue-300 hover:underline">About Us</a>
+          <span>|</span>
+          <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
+        </div>
+    </footer>
+    
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -315,7 +338,7 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
         });
-    }, 30000);
+    }, 10000);
 });
 </script>
 </html>

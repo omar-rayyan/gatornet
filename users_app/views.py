@@ -3,10 +3,16 @@ from users_app.models import User
 from django.contrib import messages
 
 def root(request):
+    if 'user_id' in request.session:
+        return redirect('home')
     return redirect('view_login_page')
 def view_login_page(request):
+    if 'user_id' in request.session:
+        return redirect('home')
     return render(request, 'login.html')
 def view_registration_page(request):
+    if 'user_id' in request.session:
+        return redirect('home')
     return render(request, 'register.html')
 def login(request):
     errors = User.objects.login_validator(request.POST)

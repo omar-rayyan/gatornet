@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from social_app.models import *
+import qrcode
+from django.urls import reverse
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.files.storage import FileSystemStorage
@@ -95,6 +97,7 @@ def view_profile(request, id):
         'friends': friends,
         'personal_details': personal_detials,
         'is_friends_with_user': is_friends_with_user,
+        'friends_count': len(friends),
     }
     return render(request, 'view_profile.html', context)
 
@@ -379,13 +382,12 @@ def update_profile(request):
         user = User.objects.get(id=int(request.session['user_id']))
         profile_pic = request.FILES.get('profile_pic')
         if profile_pic:
-            print('pp received')
             fs = FileSystemStorage()
             filename = fs.save(profile_pic.name, profile_pic)
             file_url = fs.url(filename).lstrip('/media')
             user.profile_picture = file_url
             user.save()
-        data = {
+        personal_details_data = {
             'user': user,
             'bio': request.POST.get('bio', '').strip(),
             'location': request.POST.get('location', '').strip(),
@@ -393,11 +395,60 @@ def update_profile(request):
             'phone_number': request.POST.get('phone_number', '').strip(),
             'relationship_status': request.POST.get('relationship_status', '').strip(),
         }
-        errors = PersonalDetails.objects.basic_validator(data)
+        errors = PersonalDetails.objects.basic_validator(personal_details_data)
         if errors:
             for key, value in errors.items():
-                messages.error(request, value, extra_tags='update_personal_details')
+                messages.error(request, value, extra_tags='edit_profile')
             return redirect('view_edit_profile_page')
-        PersonalDetails.objects.update_personal_details_record(data)
+        PersonalDetails.objects.update_personal_details_record(personal_details_data)
+        user_data = {
+            'user': user,
+            'id': user.id,
+            'first_name': request.POST.get('first_name'),
+            'last_name': request.POST.get('last_name'),
+            'current_password': request.POST.get('current_password'),
+            'new_password': request.POST.get('new_password'),
+            'confirm_new_password': request.POST.get('confirm_new_password'),
+            'email': request.POST.get('email'),
+        }
+        errors = User.objects.update_data_validator(user_data)
+        if errors:
+            for key, value in errors.items():
+                messages.error(request, value, extra_tags='edit_profile')
+            return redirect('view_edit_profile_page')
+        User.objects.update_user_data(user_data)
         return redirect('view_profile', id=user.id)
+    return redirect('home')
+
+def generate_qr_code(request, user_id):
+    user = User.objects.get(id=user_id)
+    add_friend_url = request.build_absolute_uri(reverse('add_friend_qr', args=[user_id]))
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(add_friend_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    response = HttpResponse(content_type="image/png")
+    img.save(response, "PNG")
+    return response
+
+def add_friend_qr(request, user_id):
+    if not 'user_id' in request.session:
+        messages.error(request, 'You must be logged in first.', extra_tags='login')
+        return redirect('/')
+    current_user_id = request.session['user_id']
+    if current_user_id == user_id:
+        messages.error(request, "You cannot add yourself as a friend.")
+        return redirect('home')
+    try:
+        friend_user = User.objects.get(id=user_id)
+        current_user = User.objects.get(id=current_user_id)
+        Friendship.objects.create_friendship({'friend_1': friend_user, 'friend_2': current_user})
+        messages.success(request, f"You are now friends with {friend_user.first_name} {friend_user.last_name}!", extra_tags='success')
+    except User.DoesNotExist:
+        messages.error(request, "User not found.", extra_tags='error')
     return redirect('home')
