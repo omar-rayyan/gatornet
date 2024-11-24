@@ -8,13 +8,15 @@ Our goal is to provide a Palestinian alternative to Facebook, Instagram, and oth
 
 This is the initial version of the platform, where we have laid the foundations for further development. By following **Object-Oriented Programming (OOP)** principles and **Agile Development** practices, we have made the platform flexible and easy to expand, adding new features seamlessly in future updates.
 
-![7](https://github.com/user-attachments/assets/99a8bbc0-33b6-4d64-a3a6-34ce4edea821)
-![6](https://github.com/user-attachments/assets/cda46386-30cc-4db2-b4b7-70f95c2f10de)
-![5](https://github.com/user-attachments/assets/2b7e4f6b-e42a-4440-b416-3f12f9736967)
-![4](https://github.com/user-attachments/assets/c060140e-91c7-4f31-9a2c-6e47994013cc)
-![3](https://github.com/user-attachments/assets/9efe11ce-ec86-49c4-b4dc-d5680b7ea52e)
-![2](https://github.com/user-attachments/assets/b9a3dba6-4fd4-41dc-a020-cdcc03e75e1f)
-![1](https://github.com/user-attachments/assets/09f6f9f9-64b8-43d7-8914-2b9919d301bd)
+![1](https://github.com/user-attachments/assets/c7c55abf-42f4-462d-a775-78695d661901)
+![2](https://github.com/user-attachments/assets/3107fdbb-85ab-4c69-94a8-f64bac0387c8)
+![3](https://github.com/user-attachments/assets/945146dd-ae0c-4937-80ac-31148f426096)
+![4](https://github.com/user-attachments/assets/b5e72533-ccac-4c8a-ba8e-f0ffbd1cdc97)
+![8](https://github.com/user-attachments/assets/54c937f0-aebd-46a1-9ad0-6a6a54359a1b)
+![5](https://github.com/user-attachments/assets/a8b2354e-6b4a-4bbd-8213-8a0b1e9a7ca4)
+![6](https://github.com/user-attachments/assets/e8bf3b2e-f130-4fc5-9f1e-25356308d30c)
+![7](https://github.com/user-attachments/assets/3c22cdf3-8eaf-4020-8803-a3d58a0e3a77)
+
 
 ## Tools Used in Development
 
