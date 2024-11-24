@@ -11,6 +11,7 @@ This is the initial version of the platform, where we have laid the foundations 
 ![1](https://github.com/user-attachments/assets/c7c55abf-42f4-462d-a775-78695d661901)
 ![2](https://github.com/user-attachments/assets/3107fdbb-85ab-4c69-94a8-f64bac0387c8)
 ![3](https://github.com/user-attachments/assets/945146dd-ae0c-4937-80ac-31148f426096)
+![9](https://github.com/user-attachments/assets/abd5b51b-b961-4104-ac11-6cf3ca20279d)
 ![8](https://github.com/user-attachments/assets/54c937f0-aebd-46a1-9ad0-6a6a54359a1b)
 ![4](https://github.com/user-attachments/assets/b5e72533-ccac-4c8a-ba8e-f0ffbd1cdc97)
 ![5](https://github.com/user-attachments/assets/a8b2354e-6b4a-4bbd-8213-8a0b1e9a7ca4)
