@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from users_app.models import User
 from django.contrib import messages
 
+
+
 def root(request):
     if 'user_id' in request.session:
         return redirect('home')
