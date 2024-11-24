@@ -43,6 +43,8 @@ def home(request):
     }
     return render(request, 'home_page.html', context)
 
+
+
 def view_edit_profile_page(request):
     if not 'user_id' in request.session:
         messages.error(request, 'You must first login.', extra_tags='login')
@@ -56,6 +58,9 @@ def view_edit_profile_page(request):
         'personal_details': personal_detials,
     }
     return render(request, 'edit_profile.html', context)
+
+
+
 
 def view_post(request, id=0):
     if not 'user_id' in request.session:
@@ -76,6 +81,9 @@ def view_post(request, id=0):
         'shared_post': shared_post,
     }
     return render(request, 'view_post.html', context)
+
+
+
 
 def view_profile(request, id):
     if not 'user_id' in request.session:
@@ -110,6 +118,9 @@ def view_profile(request, id):
     }
     return render(request, 'view_profile.html', context)
 
+
+
+
 def get_messages(request, friend_id):
     recipient = User.objects.get(id=friend_id)
     user_id = request.session['user_id']
@@ -124,6 +135,9 @@ def get_messages(request, friend_id):
         for message in messages
     ]
     return JsonResponse({'messages': message_data})
+
+
+
 
 def like_post(request):
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
