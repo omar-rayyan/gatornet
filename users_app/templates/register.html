@@ -1,78 +1,60 @@
 <html>
-<head>
+  <head>
     <title>GatorNet | Register</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+  </head>
+  <body class="bg-white min-h-screen flex flex-col justify-between">
+
 </head>
 <body class="bg-white min-h-screen flex flex-col justify-between">
+
     <header class="bg-green-700 p-4 flex items-center" id="navbar">
-        <div class="rounded-full flex items-center justify-center">
-            <img src="{% static 'img/logo.png' %}" id="logo" class="h-12 w-12"/>
-        </div>
-        <h1 class="text-white text-5xl ml-auto mr-auto font-bold" id="NavBartext">GatorNet</h1>
+      <div class="rounded-full flex items-center justify-center">
+        <img src="{% static 'img/logo.png' %}" id="logo" class="h-12 w-12" />
+      </div>
+      <h1 class="text-white text-5xl ml-auto mr-auto font-bold" id="NavBartext">GatorNet</h1>
     </header>
     <main class="flex justify-center mt-10 flex-grow" id="main">
-        <div class="bg-gray-100 rounded-lg shadow-lg w-full max-w-lg" id="mainContainer">
-            <div class="p-6" id="textInReg">
-                <form action="{% url 'register' %}" method="post" class="space-y-4">
-                    {% csrf_token %}
-                    <label class="block font-medium">
-                        First Name:
-                        <input type="text" class="w-full p-2 mt-1 border rounded" name="first_name" value="{% if 'registerform' in request.session %}{{ request.session.registerform.first_name }}{% endif %}" />
-                    </label>
-                    <label class="block font-medium">
-                        Last Name:
-                        <input type="text" class="w-full p-2 mt-1 border rounded" name="last_name" value="{% if 'registerform' in request.session %}{{ request.session.registerform.last_name }}{% endif %}" />
-                    </label>
-                    <label class="block font-medium">
-                        Email:
-                        <input type="email" class="w-full p-2 mt-1 border rounded" name="email" value="{% if 'registerform' in request.session %}{{ request.session.registerform.email }}{% endif %}" />
-                    </label>
-                    <label class="block font-medium">
-                        Password:
-                        <input type="password" class="w-full p-2 mt-1 border rounded" name="password" value="{% if 'registerform' in request.session %}{{ request.session.registerform.password }}{% endif %}" />
-                    </label>
-                    <label class="block font-medium">
-                        Confirm Password:
-                        <input type="password" class="w-full p-2 mt-1 border rounded" name="passwordconfirmation" value="{% if 'registerform' in request.session %}{{ request.session.registerform.passwordconfirmation }}{% endif %}" />
-                    </label>
-                    <label class="block font-medium">
-                        Date of Birth:
-                        <input type="date" class="w-full p-2 mt-1 border rounded" name="date_of_birth" value="{% if 'registerform' in request.session %}{{ request.session.registerform.date_of_birth }}{% endif %}" />
-                    </label>
-                    <div class="block font-medium">
-                        Gender:
-                        <div class="flex items-center space-x-4 mt-1">
-                            <label class="flex items-center">
-                                <input type="radio" name="gender" class="mr-2" /> Male
-                            </label>
-                            <label class="flex items-center">
-                                <input type="radio" name="gender" class="mr-2" /> Female
-                            </label>
-                        </div>
-                    </div>
-                    <p class="text-sm">
-                        Already have an account? 
-                        <a href="{% url 'view_login_page' %}" class="text-blue-800 font-medium hover:underline">Log In here.</a>
-                    </p>
-                    {% for message in messages %}
-                        <p class="text-red-500 text-sm font-medium" id="message-error">{{ message }}</p>
-                    {% endfor %}
-                    <div class="text-center mt-4" id="buttonClass">
-                        <button type="submit" class="bg-green-700 text-white px-6 py-0 rounded shadow hover:bg-green-600 transition" id="button">Register</button>
-                    </div>
-                </form>
+      <div class="bg-gray-100 rounded-lg shadow-lg w-full max-w-lg" id="mainContainer">
+        <div class="p-6" id="textInReg">
+          <form action="{% url 'register' %}" method="post" class="space-y-4">
+            {% csrf_token %}
+            <label class="block font-medium">First Name:<input type="text" class="w-full p-2 mt-1 border rounded" name="first_name" value="{% if 'registerform' in request.session %}{{ request.session.registerform.first_name }}{% endif %}" /></label>
+            <label class="block font-medium">Last Name:<input type="text" class="w-full p-2 mt-1 border rounded" name="last_name" value="{% if 'registerform' in request.session %}{{ request.session.registerform.last_name }}{% endif %}" /></label>
+            <label class="block font-medium">Email:<input type="email" class="w-full p-2 mt-1 border rounded" name="email" value="{% if 'registerform' in request.session %}{{ request.session.registerform.email }}{% endif %}" /></label>
+            <label class="block font-medium">Password:<input type="password" class="w-full p-2 mt-1 border rounded" name="password" value="{% if 'registerform' in request.session %}{{ request.session.registerform.password }}{% endif %}" /></label>
+            <label class="block font-medium">Confirm Password:<input type="password" class="w-full p-2 mt-1 border rounded" name="passwordconfirmation" value="{% if 'registerform' in request.session %}{{ request.session.registerform.passwordconfirmation }}{% endif %}" /></label>
+            <label class="block font-medium">Date of Birth:<input type="date" class="w-full p-2 mt-1 border rounded" name="date_of_birth" value="{% if 'registerform' in request.session %}{{ request.session.registerform.date_of_birth }}{% endif %}" /></label>
+            <div class="block font-medium">
+              Gender:<div class="flex items-center space-x-4 mt-1">
+                <label class="flex items-center"><input type="radio" name="gender" class="mr-2" />Male</label>
+                <label class="flex items-center"><input type="radio" name="gender" class="mr-2" />Female</label>
+              </div>
             </div>
+            <p class="text-sm">
+              Already have an account?
+              <a href="{% url 'view_login_page' %}" class="text-blue-800 font-medium hover:underline">Log In here.</a>
+            </p>
+            {% for message in messages %}
+              <p class="text-red-500 text-sm font-medium" id="message-error">{{ message }}</p>
+            {% endfor %}
+            <div class="text-center mt-4" id="buttonClass">
+              <button type="submit" class="bg-green-700 text-white px-6 py-0 rounded shadow hover:bg-green-600 transition" id="button">Register</button>
+            </div>
+          </form>
         </div>
+      </div>
     </main>
     <footer class="bg-green-700 text-white text-center py-4 mt-10" id="bottomPage">
-        <div class="space-x-4">
-            <a href="{% url 'about_us' %}" class="text-blue-300 hover:underline">About Us</a>
-            <span>|</span>
-            <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
-        </div>
+      <div class="space-x-4">
+        <a href="{% url 'about_us' %}" class="text-blue-300 hover:underline">About Us</a>
+        <span>|</span>
+        <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
+      </div>
     </footer>
-</body>
+  </body>
 </html>
