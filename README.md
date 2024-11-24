@@ -37,9 +37,9 @@ We welcome contributions to Gatornet! If you'd like to get involved, feel free t
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is not licensed, it is open-source and you may feel free to use anything in it.
 
 ## Contact
 
-For more information or inquiries, feel free to contact the team via our communication channels on **WhatsApp** or **Microsoft Teams**.
+For more information or inquiries, feel free to contact our team lead at omarrayyan999@gmail.com
 
