@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    {% load custom_filters %}
+    {% load static %} 
+    <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-green-700 p-4 flex items-center" id="navbar">
+        <div class="rounded-full flex items-center justify-center">
+          <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" id="logo" class="h-12 w-12" alt="Logo" /></a>
+        </div>
+        <form action="{% url 'search' %}" method="post">
+            {% csrf_token %}
+            <input type="search" placeholder="Search for users..." name="search" class="flex w-[50vh] p-2 rounded-full border-2 border-gray-600" id="search" />
+            <button type="submit" hidden></button>
+          </form>
+        <div>
+          {% if user.id == request.session.user_id %}
+            <a href="{% url 'view_edit_profile_page' %}" class="text-white px-4 py-2 ml-4 rounded font-bold hover:text-gray-300 transition-colors duration-200">Edit Profile</a>
+          {% else %}
+          <a href="{% url 'view_profile' request.session.user_id %}" class="text-white px-4 py-2 ml-4 rounded font-bold hover:text-gray-300 transition-colors duration-200">My Profile</a>
+          {% endif %}
+          <a href="{% url 'logout' %}"><button class="text-white bg-green-800 px-4 py-0 ml-4 rounded hover:bg-green-900" id="button">Log Out</button></a>
+        </div>
+      </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow mt-4 flex px-4 space-x-6">
+        
+        <!-- Sidebar -->
+        <aside class="w-1/4 bg-gray-200 p-4 rounded-lg shadow">
+            <div class="text-center">
+                <div class="relative inline-block">
+                    <!-- Profile Picture -->
+                    <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" 
+                         alt="Profile of user" 
+                         class="h-24 w-24 mx-auto rounded-full border {% if user.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}">
+                
+                    <!-- QR Code Icon -->
+                    <a href="{% url 'generate_qr_code' user.id %}" 
+                        target="_blank"
+                       class="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow h-8 w-8 flex items-center justify-center">
+                        <i class="fas fa-qrcode text-green-700 text-lg"></i>
+                    </a>
+                </div>
+                
+                
+                <h2 class="text-2xl font-bold mt-4">{{ user.first_name }} {{ user.last_name }}</h2>
+                <p class="mt-2 text-gray-700">{{ personal_details.bio }}</p>
+                <p class="mt-2 text-gray-700">{{ personal_details.workplace }}</p>
+                <p class="mt-2 text-gray-700">{{ personal_details.location }}</p>
+                <p class="mt-2 font-semibold text-gray-700">{{ personal_details.phone_number }}</p>
+                <p class="mt-2 text-gray-700">{{ personal_details.relationship_status }}</p>
+                {% if has_sent_a_friend_request_to_user %}
+                    <form action="{% url 'cancel_friend_request' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="sender_id" value="{{ user.id }}">
+                        <p class="font-bold italic mt-[3vh] mb-[1vh]">Pending Friend Request</p>
+                        <button class="text-white" id="friendbutton">Cancel Request</button>
+                    </form>
+                    {% else %}
+                        {% if has_received_a_friend_request_from_user %}
+                        <p class="font-bold italic mt-[3vh] mb-[1vh]">They sent you a Friend Request</p>
+                        <div class="flex justify-center space-x-3">
+                            <form action="{% url 'respond_to_friend_request' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="sender_id" value="{{ user.id }}">
+                                <input type="hidden" name="response" value="accept">
+                                <input type="hidden" name="current_view" value="view_profile">
+                                <button class="text-green-600 hover:text-green-800" aria-label="Accept">
+                                <i class="fas fa-check-circle text-4xl"></i>
+                                </button>
+                            </form>
+                            <form action="{% url 'respond_to_friend_request' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="sender_id" value="{{ user.id }}">
+                                <input type="hidden" name="response" value="decline">
+                                <input type="hidden" name="current_view" value="view_profile">
+                                <button class="text-red-600 hover:text-red-800" aria-label="Decline">
+                                <i class="fas fa-times-circle text-4xl"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        {% if is_friends_with_user == False %}
+                            <form action="{% url 'add_friend' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="friend_id" value="{{ user.id }}">
+                                <button class="text-white" id="friendbutton">Add Friend</button>
+                            </form>
+                        {% elif is_friends_with_user == True %}
+                            <form action="{% url 'remove_friend' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="friend_id" value="{{ user.id }}">
+                                <button class="text-white" id="friendbutton">Remove Friend</button>
+                            </form>
+                        {% else %}
+                            <p class="font-bold italic mt-[1vh]">This is You</p>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="mt-6">
+                <h3 class="text-lg font-bold text-green-700">Friends (<span class="text-black">{{ friends_count }}</span>)</h3>
+                <div class="space-y-4 mt-4">
+                    <!-- Friend -->
+                    {% for friend in friends %}
+                        <div class="friend-container flex items-center bg-white p-2 rounded-lg shadow">
+                            <a href="{% url 'view_profile' friend.id %}"><img src="{% if friend.profile_picture.url %} {{ friend.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile of user" class="h-8 w-8 rounded-full {% if friend.is_online %} border-4 border-green-700 {% else %} border-4 border-gray-600 {% endif %}"></a>
+                            <div class="ml-4 text-gray-700 flex-grow">
+                                <a href="{% url 'view_profile' friend.id %}">{{ friend.first_name }} {{ friend.last_name }}</a>
+                            </div>
+                            {% if user.id == request.session.user_id %}
+                                <button class="remove-friend-btn text-red-500 font-bold" data-friend-id="{{ friend.id }}" alt="Remove Friend">X</button>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <div class="friend-container flex items-center bg-white p-2 rounded-lg shadow">
+                            <p>This user does not have any friends yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Posts -->
+        <section class="w-3/4 space-y-6">
+            <!-- Create Post -->
+            {% if user.id == request.session.user_id %}
+                <form action="{% url 'create_post' %}" method="post">
+                    {% csrf_token %}
+                    <div class="bg-gray-50 p-4 rounded-lg shadow mb-6">
+                    <div class="flex items-center mb-4">
+                        <a href="{% url 'view_profile' user.id %}"><img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-12 w-12 rounded-full border-4 border-green-700" /></a>
+                        <textarea name='content' placeholder="What are you thinking about?" class="ml-4 flex-grow p-2 border rounded-lg focus:border-green-700 focus:outline-none"></textarea>
+                    </div>
+                    {% for message in messages %}
+                        {% if 'create_post' in message.tags %}
+                        <p class="text-red-500 text-sm font-medium" id="message-error">{{ message }}</p>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="text-right">
+                        <button class="bg-green-700 text-white px-6 py-0 rounded shadow hover:bg-green-600 transition" id="button">Post</button>
+                    </div>
+                    <input type="hidden" name="current_view" value="{{ user.id }}">
+                    </div>
+                </form>
+            {% endif %}
+
+            <!-- Posts -->
+            {% for item in posts_with_likes %}
+            <div class="bg-gray-50 p-4 rounded-lg shadow mb-6 post-container">
+            {% if item.post.shared %}
+                <p class="text-gray-700 mb-4 border-b pb-[0.7vh] border-gray-600"><span class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></span> shared <span class="font-bold">{% if item.post.creator == item.shared_post.creator %} his own post.{% else %} <a href="{% url 'view_profile' item.shared_post.creator.id %}">{{ item.shared_post.creator.full_name }}'s</a></span> post.{% endif %}</p>
+                <div class="flex items-center mb-2">
+                    <a href="{% url 'view_profile' item.shared_post.creator.id %}"><img src="{{ item.shared_post.creator.profile_picture.url }}" alt="Profile" class="h-12 w-12 rounded-full 
+                        {% if item.shared_post.creator.is_online %}
+                            border-4 border-green-700
+                        {% else %}
+                            border-4 border-gray-600
+                        {% endif %}" /></a>
+                {% else %}
+            <div class="flex items-center mb-2">
+                <a href="{% url 'view_profile' item.post.creator.id %}"><img src="{{ item.post.creator.profile_picture.url }}" alt="Profile" class="h-12 w-12 rounded-full 
+                        {% if item.post.creator.is_online %}
+                            border-4 border-green-700
+                        {% else %}
+                            border-4 border-gray-600
+                        {% endif %}" /></a>
+            {% endif %}
+                <div class="ml-4">
+                    {% if item.post.shared %}
+                    <h3 class="font-bold"><a href="{% url 'view_profile' item.shared_post.creator.id %}">{{ item.shared_post.creator.full_name }}</a></h3>
+                    {% else %}
+                    <h3 class="font-bold"><a href="{% url 'view_profile' item.post.creator.id %}">{{ item.post.creator.full_name }}</a></h3>
+                    {% endif %}
+                <p class="text-gray-500 text-sm">{{ item.post.created_at|time_ago }}</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4"><a href="{% url 'view_post' item.post.id %}">{{ item.post.content }}</a></p>
+            <div class="flex items-center justify-between text-gray-700">
+                <p class="text-sm">
+                <span class="font-bold text-green-700 like-count"><a href="{% url 'view_post' item.post.id %}">{{ item.post.likes.count|abbreviate_number }} likes </span> | {{ item.post.comments.count|abbreviate_number }} comments</a>
+                </p>          
+                <div class="flex items-center space-x-4">
+                <button class="like-btn {% if item.has_liked %} text-green-700 {% else %} text-gray-700 hover:text-green-700 {% endif %}" data-post-id="{{ item.post.id }}">
+                    <i class="fas fa-thumbs-up"></i>
+                </button>
+                    <button class="text-gray-700 hover:text-green-700"><a href="{% url 'view_post' item.post.id %}"><i class="fas fa-comment"></i></a></button>
+                <form action="{% url 'share_post' %}" method="post">
+                    {% csrf_token %}
+                    <button class="text-gray-700 hover:text-green-700"><i class="fas fa-share"></i></button>
+                    <input type="hidden" name="post_id" value="{{ item.post.id }}">
+                    <input type="hidden" name="current_view" value="view_profile">
+                    <input type="hidden" name="current_profile" value="{{ user.id }}">
+                </form>
+                {% if item.post.creator.id == request.session.user_id %}
+                    <button class="delete-post-btn text-gray-700 hover:text-red-600" data-post-id="{{ item.post.id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                {% endif %}
+                </div>
+            </div>
+            </div>
+            {% empty %}
+                <div class="friend-container flex items-center bg-white p-2 rounded-lg shadow">
+                    <p>This user does not have any posts yet.</p>
+                </div>
+            {% endfor %}
+        </section>
+
+    </main>
+    <!-- Footer -->
+    <footer class="bg-green-700 text-white text-center py-4 mt-[3vh]" id="bottomPage">
+        <div class="space-x-4">
+          <a href="{% url 'about_us' %}" class="text-blue-300 hover:underline">About Us</a>
+          <span>|</span>
+          <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
+        </div>
+    </footer>
+    
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+    $(".like-btn").click(function () {
+        var postId = $(this).data('post-id');
+        var likeButton = $(this);
+
+        // Prevent multiple clicks
+        if (likeButton.hasClass('loading')) return;
+        likeButton.addClass('loading');
+
+        // Send AJAX request
+        $.ajax({
+            url: "{% url 'like_post' %}",
+            method: 'POST',
+            data: {
+                'post_id': postId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Update the like count and button state
+                    if (response.liked) {
+                        likeButton.addClass('text-green-700');
+                    } else {
+                        likeButton.removeClass('text-green-700');
+                    }
+
+                    var postContainer = likeButton.closest('.post-container');
+                    var likeCountLabel = postContainer.find('.like-count'); 
+                    likeCountLabel.text(response.like_count + " likes");
+
+                } else {
+                    alert("Failed to like/unlike the post.");
+                }
+            },
+            error: function () {
+                alert("An error occurred. Please try again.");
+            },
+            complete: function () {
+                likeButton.removeClass('loading');
+            }
+        });
+    });
+    $(".delete-post-btn").click(function () {
+        var postId = $(this).data('post-id');
+        var deleteButton = $(this);
+
+        if (deleteButton.hasClass('loading')) return;
+        deleteButton.addClass('loading');
+
+        $.ajax({
+            url: "{% url 'delete_post' %}",
+            method: 'POST',
+            data: {
+                'post_id': postId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    deleteButton.closest('.post-container').remove();
+                } else {
+                    alert(response.error || "Failed to delete the post.");
+                }
+            },
+            error: function () {
+                alert("An error occurred. Please try again.");
+            },
+            complete: function () {
+                deleteButton.removeClass('loading');
+            }
+        });
+    });
+    $(".remove-friend-btn").click(function () {
+        var friendId = $(this).data('friend-id');
+        var button = $(this);
+
+        // Disable the button to prevent multiple clicks
+        button.prop('disabled', true);
+
+        $.ajax({
+            url: "{% url 'remove_friend' %}",
+            method: "POST",
+            data: {
+                'friend_id': friendId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Remove the friend from the UI
+                    button.closest('.friend-container').remove();
+                } else {
+                    alert(response.error || "An error occurred.");
+                }
+            },
+            error: function () {
+                alert("Failed to remove friend. Please try again.");
+            },
+            complete: function () {
+                // Re-enable the button
+                button.prop('disabled', false);
+            }
+        });
+    });
+    $(".add-friend-btn").click(function () {
+        var friendId = $(this).data('friend-id');
+        var button = $(this);
+    
+        // Disable the button to prevent multiple clicks
+        button.prop('disabled', true);
+    
+        $.ajax({
+            url: "{% url 'add_friend' %}",
+            method: "POST",
+            data: {
+                'friend_id': friendId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Optionally, update the button or UI
+                    button.text("Friend Added").addClass("text-green-500").prop('disabled', true);
+                } else {
+                    alert(response.error || "An error occurred.");
+                }
+            },
+            error: function () {
+                alert("Failed to add friend. Please try again.");
+            },
+            complete: function () {
+                // Re-enable the button if needed
+                button.prop('disabled', false);
+            }
+        });
+    });    
+    setInterval(() => {
+        fetch('/update_activity/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+        });
+    }, 10000);
+});
+</script>
+</html>

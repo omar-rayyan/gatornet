@@ -19,101 +19,109 @@
                 <img src="{% static 'img/logo.png' %}" id="logo" class="h-[6vh] w-[6vh]" alt="Logo">
             </a>
         </div>
+        <div class="w-[25vh]"></div>
         <h1 class="text-white text-[4vh] ml-auto font-bold">Edit Profile</h1>
         <div class="ml-auto">
-
-            <button class="text-white px-[2vh] py-[0vh] mr-[3vh]" id="button">Log Out</button>
+            <a href="{% url 'view_profile' request.session.user_id %}" class="text-white px-4 py-2 ml-4 rounded font-bold hover:text-gray-300 transition-colors duration-200">My Profile</a>
+            <a href="{% url 'logout' %}"><button class="text-white px-[2vh] py-[0vh] mr-[3vh]" id="button">Log Out</button></a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex flex-grow">
+    <main class="flex flex-grow mt-[2vh]">
         <!-- Left Content -->
         <div class="w-[150vh] mx-auto bg-white shadow-md rounded-lg p-[3.5vh]">
+            {% for message in messages %}
+              {% if 'edit_profile' in message.tags %}
+                <p class="text-red-500 text-sm font-medium mb-[2vh]" id="message-error">{{ message }}</p>
+              {% endif %}
+            {% endfor %}
+        <form action='{% url "edit_profile" %}' method="post" class="grid grid-cols-2 gap-[3vh]" enctype="multipart/form-data">
+            {% csrf_token %}
             <div class="flex items-center mb-[2vh]">
                 <!-- Profile Picture -->
                 <div class="relative">
-                    <img src="{% static 'img/default-profile.png' %}" alt="Profile" class="h-[10vh] w-[10vh] rounded-full border-[0.3vh] border-gray-300">
-                    <label for="profile-pic" class="absolute bottom-0 right-0 bg-gray-700 text-white p-[1vh] rounded-full cursor-pointer">
-                        <i class="fas fa-camera"></i>
-                    </label>
+                    <img src="{% if user.profile_picture.url %} {{ user.profile_picture.url }} {% else %} {% static 'imgs/default-profile.png' %} {% endif %}" alt="Profile" class="h-[10vh] w-[10vh] rounded-full border-4 border-green-700">
                     <input id="profile-pic" type="file" class="hidden">
                 </div>
-                <h2 class="text-[2.2vh] font-bold ml-[2vh]">{{ user.first_name }} {{ user.last_name }}</h2>
+                <h2 class="text-[2.2vh] font-bold ml-[2vh]">{{ user.full_name }}</h2>
             </div>
-
-            <form action='{% url "edit_profile" %}' method="post" class="grid grid-cols-2 gap-[3vh]">
-                {% csrf_token %}
-                <!-- Edit Name -->
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Edit Name:</label>
-                    <input type="text" placeholder="First Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name='first_name' value="{{ user.first_name }}">
-                    <input type="text" placeholder="Last Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name='last_name' value="{{ user.last_name }}">
-                </div>
-                <!-- Add Phone -->
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Add Phone Number:</label>
-                    <input type="text" placeholder="Phone Number" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="phone_number" value="{{ personal_details.phone_number }}">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Relationship Status:</label>
-                    <input type="text" placeholder="Relationship Status" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="relationship_status" value="{{ personal_details.relationship_status }}">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Workplace:</label>
-                    <input type="text" placeholder="Workplace" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="workplace" value="{{ personal_details.workplace }}">
-                </div>
-                <!-- Add Bio -->
-                <div class="col-span-2">
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Add Bio:</label>
-                    <textarea placeholder="Add a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="bio">{{ personal_details.bio }}</textarea>
-                </div>
-                <!-- Change Password -->
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Current Password:</label>
-                    <input type="password" placeholder="Current Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="current_password">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Email:</label>
-                    <input type="email" placeholder="Email" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="email" value="{{ user.email }}">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">New Password:</label>
-                    <input type="password" placeholder="New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="new_password">
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium text-[1.8vh]">Confirm New Password:</label>
-                    <input type="password" placeholder="Confirm New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="confirm_new_password">
-                    
-                </div>
-                <div id="updatebuttondiv" class="col-span-2">
-                    <button class="text-white px-[2vh] py-[0vh]" id="button">Update</button>
-                </div>
-            </form>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Upload Profile Picture:</label>
+                <input type="file" name="profile_pic" accept="image/*" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" />
+            </div>
+            <!-- Edit Name -->
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Edit Name:</label>
+                <input type="text" placeholder="First Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name='first_name' value="{{ user.first_name }}">
+                <input type="text" placeholder="Last Name" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name='last_name' value="{{ user.last_name }}">
+            </div>
+            <!-- Add Phone -->
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Phone Number:</label>
+                <input type="text" placeholder="Phone Number" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="phone_number" value="{{ personal_details.phone_number }}">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Relationship Status:</label>
+                <input type="text" placeholder="Relationship Status" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="relationship_status" value="{{ personal_details.relationship_status }}">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Workplace:</label>
+                <input type="text" placeholder="Workplace" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="workplace" value="{{ personal_details.workplace }}">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Location:</label>
+                <input type="text" placeholder="Location" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="location" value="{{ personal_details.location }}">
+            </div>
+            <!-- Add Bio -->
+            <div class="col-span-2">
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Bio:</label>
+                <textarea placeholder="Type a short bio" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="bio">{{ personal_details.bio }}</textarea>
+            </div>
+            <!-- Change Password -->
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Current Password:</label>
+                <input type="password" placeholder="Current Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="current_password">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Email:</label>
+                <input type="email" placeholder="Email" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="email" value="{{ user.email }}">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">New Password:</label>
+                <input type="password" placeholder="New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="new_password">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-medium text-[1.8vh]">Confirm New Password:</label>
+                <input type="password" placeholder="Confirm New Password" class="w-full p-[1.2vh] mt-[0.5vh] border rounded" name="confirm_new_password">
+                
+            </div>
+            <div id="updatebuttondiv" class="col-span-2">
+                <button class="text-white px-[2vh] py-[0vh]" id="button">Update</button>
+            </div>
+        </form>
     </div>
-        <!-- Right Sidebar -->
-        <div class="w-[40vh] bg-gray-50 border-l border-gray-200 p-[2vh] overflow-y-auto">
-            <h3 class="text-[2vh] font-bold mb-[2vh]">User Profiles</h3>
-            <ul>
-                {% for user in users %}
-                <li class="flex items-center space-x-[1vh] py-[1vh]">
-                    <img src="{% static 'img/default-profile.png' %}" alt="Profile" class="h-[5vh] w-[5vh] rounded-full">
-                    <span class="text-gray-800 font-medium text-[1.8vh]">Name of User</span>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-green-700 text-white text-center py-[2vh]" id="bottomPage">
+    <footer class="bg-green-700 text-white text-center py-[2vh] mt-[3vh]" id="bottomPage">
         <div class="space-x-[2vh]">
-            <a href="#" class="text-blue-300 hover:underline text-[1.8vh]">About Us</a>
+            <a href="{% url 'about_us' %}" class="text-blue-300 hover:underline text-[1.8vh]">About Us</a>
             <span>|</span>
             <span class="text-[1.8vh]">&copy; 2024 GatorNet. All Rights Reserved.</span>
         </div>
     </footer>
-
+<script>
+    setInterval(() => {
+        fetch('/update_activity/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+        });
+    }, 10000);
+</script>
 </body>
 
 </html>
