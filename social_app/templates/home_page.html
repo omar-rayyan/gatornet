@@ -27,7 +27,6 @@
         <a href="{% url 'logout' %}"><button class="text-white bg-green-800 px-4 py-0 ml-4 rounded hover:bg-green-900" id="button">Log Out</button></a>
       </div>
     </header>
-
     <!-- Main Content -->
     <main class="flex-grow flex">
       <!-- Left Content -->
@@ -56,7 +55,6 @@
             <input type="hidden" name="current_view" value="home">
           </div>
         </form>
-
         <!-- Posts -->
         {% for item in posts_with_likes %}
         <div class="bg-gray-50 p-4 rounded-lg shadow mb-6 post-container">
@@ -116,7 +114,6 @@
         </div>
         {% endfor %}
       </div>
-
       <!-- Right Sidebar -->
       <div class="w-1/4 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
         <!-- Friend Requests Section -->
@@ -157,7 +154,6 @@
           {% endfor %}
         </ul>
         {% endif %}
-
         <!-- Your Friends Section -->
         <h3 class="text-lg font-bold mb-4">Your Friends</h3>
         <ul id="friends-list">
@@ -174,10 +170,8 @@
         </ul>
       </div>
     </main>
-
     <!-- Chat Window Container -->
     <div id="chat-windows" class="fixed bottom-0 right-0 flex flex-row flex-wrap space-x-2 p-4 z-50 mr-[50vh]"></div>
-
     <!-- Footer -->
     <footer class="bg-green-700 text-white text-center py-4" id="bottomPage">
       <div class="space-x-4">
@@ -192,7 +186,6 @@
     $(document).ready(function () {
       const friendsList = document.getElementById('friends-list');
   const chatWindowsContainer = document.getElementById('chat-windows');
-
   friendsList.addEventListener('click', async (e) => {
     const friendItem = e.target.closest('.friend-item');
     if (friendItem) {
@@ -200,7 +193,6 @@
         const friendName = friendItem.querySelector('span').textContent;
         const friendImg = friendItem.querySelector('img').src;
         const currentUserId = "{{ user.id }}";
-
         // Check if chat window for this friend already exists
         if (!document.querySelector(`#chat-window-${friendId}`)) {
             const chatWindow = document.createElement('div');
@@ -217,9 +209,7 @@
                 <div class="chat-messages overflow-y-auto h-[15rem] border-b mb-2 flex flex-col"></div>
                 <form class="chat-form flex items-center space-x-2">
                     <input type="text" class="chat-input flex-1 border border-gray-300 rounded-lg p-2" placeholder="Type a message..." />
-                </form>
-            `;
-
+                </form>`;
             chatWindowsContainer.appendChild(chatWindow);
 
             const chatMessages = chatWindow.querySelector('.chat-messages');
@@ -251,7 +241,6 @@
                     console.error('Error fetching messages:', error);
                 }
             }, 1000);
-
             // Fetch existing messages
             try {
                 const response = await fetch(`/get_messages/${friendId}/`);
@@ -270,14 +259,11 @@
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
-
-
             // Close chat window
             chatWindow.querySelector('.close-chat').addEventListener('click', () => {
                 chatWindow.remove();
                 clearInterval(messagesInterval);
             });
-
             // Handle sending messages
             const form = chatWindow.querySelector('.chat-form');
             form.addEventListener('submit', (event) => {
