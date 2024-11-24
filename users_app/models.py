@@ -8,7 +8,6 @@ from django.db.models import Q, Value
 from django.db.models.functions import Concat
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
-
 class UserManager(models.Manager):
     def registration_validator(self, postData):
         errors = {}
@@ -66,6 +65,7 @@ class UserManager(models.Manager):
                     errors["password"] = "Incorrect password."
                     return errors
         return errors
+
     def update_data_validator(self, postData):
         errors = {}
         if len(postData['first_name']) < 2:
@@ -99,6 +99,7 @@ class UserManager(models.Manager):
                 errors["current_password"] = "Incorrect current password."
                 return errors
         return errors
+
     def create_user(self, postData):
         from social_app.models import PersonalDetails
         hashed_password = bcrypt.hashpw(postData['password'].encode(), bcrypt.gensalt()).decode()
@@ -152,8 +153,10 @@ class User(models.Model):
         friendships = Friendship.objects.filter(models.Q(friend_1=self) | models.Q(friend_2=self))
         friends = [friendship.friend_1 if friendship.friend_2 == self else friendship.friend_2 for friendship in friendships]
         return friends
+
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
     def is_online(self):
         now = timezone.now()
         if self.last_activity > now - timedelta(minutes=5):
