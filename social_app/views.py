@@ -421,7 +421,8 @@ def update_profile(request):
         profile_pic = request.FILES.get('profile_pic')
         if profile_pic:
             fs = FileSystemStorage()
-            filename = fs.save(profile_pic.name, profile_pic)
+            sanitized_filename = profile_pic.name.replace(" ", "_")
+            filename = fs.save(sanitized_filename, profile_pic)
             file_url = fs.url(filename).lstrip('/media')
             user.profile_picture = file_url
             user.save()
