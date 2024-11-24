@@ -7,7 +7,7 @@
 Our goal is to provide a Palestinian alternative to Facebook, Instagram, and other social media platforms. Gatornet aims to be as close as possible to Western counterparts in terms of functionality, offering most (if not all) of the features already present on Facebook. This way, we can ensure a fair, honest, and free user experience for the Palestinian people.
 
 This is the initial version of the platform, where we have laid the foundations for further development. By following **Object-Oriented Programming (OOP)** principles and **Agile Development** practices, we have made the platform flexible and easy to expand, adding new features seamlessly in future updates.
-
+![alt text](1.jpg) ![alt text](2.jpg) ![alt text](3.jpg) ![alt text](4.jpg) ![alt text](5.jpg) ![alt text](6.jpg) ![alt text](7.jpg)
 ## Tools Used in Development
 
 - **Trello** - Project management and task tracking.
