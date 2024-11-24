@@ -125,7 +125,6 @@
                     {{ comment.created_at|time_ago }}
                   </span>
                 </div>
-                
                 <p id="content-{{ comment.id }}" class="mt-1 text-gray-700 text-sm">
                   {{ comment.content }}
                 </p>
@@ -147,7 +146,6 @@
               </div>
             </div>
           {% endfor %}
-
          </div>
          <form action="{% url 'add_comment' %}" method="post">
           {% csrf_token %}
@@ -161,7 +159,6 @@
           </div>
         </form>
       </main>
-
         <!-- Footer -->
         <footer class="bg-green-700 text-white text-center py-4 mt-[3vh]" id="bottomPage">
           <div class="space-x-4">
