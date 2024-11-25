@@ -1,0 +1,78 @@
+<html>
+
+<head>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <title>FAQs | GatorNet</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-green-700 p-4 flex items-center" id="navbar">
+      <div class="rounded-full flex items-center justify-center">
+        <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" id="logo" class="h-12 w-12" /></a>
+      </div>
+      <h1 class="text-white text-5xl ml-auto mr-auto font-bold" id="NavBartext"><a href="{% url 'home' %}">GatorNet</a></h1>
+  </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto mt-10 px-6">
+        <h2 class="text-2xl font-bold mb-5">Frequently Asked Questions</h2>
+        
+        <!-- Accordion -->
+        <div class="space-y-4">
+            <!-- FAQ Item 1 -->
+            <details class="bg-white rounded-lg shadow-md">
+                <summary class="px-4 py-3 font-semibold bg-gray-100 text-gray-700 cursor-pointer rounded-t-lg focus:outline-none">
+                    What is GatorNet?
+                </summary>
+                <div class="px-4 py-3 bg-gray-50 text-gray-700">
+                    GatorNet is a platform for unfiltered communication. It was created by full-stack development students from AXSOS Academy in Palestine, designed to give users a space to express themselves freely without censorship or constraints.
+                </div>
+            </details>
+            
+            <!-- FAQ Item 2 -->
+            <details class="bg-white rounded-lg shadow-md">
+                <summary class="px-4 py-3 font-semibold bg-gray-100 text-gray-700 cursor-pointer rounded-t-lg focus:outline-none">
+                    What makes GatorNet different from other social media platforms?
+                </summary>
+                <div class="px-4 py-3 bg-gray-50 text-gray-700">
+                    Unlike many other social media platforms, GatorNet allows users to post content freely without the worry of censorship. It places an emphasis on free speech, enabling open communication and uncensored posting.
+                </div>
+            </details>
+    
+            <!-- FAQ Item 3 -->
+            <details class="bg-white rounded-lg shadow-md">
+                <summary class="px-4 py-3 font-semibold bg-gray-100 text-gray-700 cursor-pointer rounded-t-lg focus:outline-none">
+                    Is GatorNet secure and reliable?
+                </summary>
+                <div class="px-4 py-3 bg-gray-50 text-gray-700">
+                    Yes, GatorNet is built with cutting-edge technologies to ensure your privacy and the security of your data. The platform takes user security seriously to maintain a reliable and safe space for communication.
+                </div>
+            </details>
+    
+            <!-- FAQ Item 4 -->
+            <details class="bg-white rounded-lg shadow-md">
+                <summary class="px-4 py-3 font-semibold bg-gray-100 text-gray-700 cursor-pointer rounded-t-lg focus:outline-none">
+                    Can I send private messages on GatorNet?
+                </summary>
+                <div class="px-4 py-3 bg-gray-50 text-gray-700">
+                    Yes, GatorNet offers a messaging system that allows users to stay connected and have private conversations with other members of the platform, while maintaining privacy and security.
+                </div>
+            </details>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-green-700 text-white text-center py-4" id="bottomPage">
+      <div class="space-x-4">
+        <a href="{% url 'about_us' %}" class="text-blue-300 hover:underline">About Us</a>
+        <span>|</span>
+        <span>&copy; 2024 GatorNet. All Rights Reserved.</span>
+      </div>
+    </footer>
+</body>
+
+</html>
