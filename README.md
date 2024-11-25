@@ -17,6 +17,8 @@ This is the initial version of the platform, where we have laid the foundations 
 ![5](https://github.com/user-attachments/assets/a8b2354e-6b4a-4bbd-8213-8a0b1e9a7ca4)
 ![6](https://github.com/user-attachments/assets/e8bf3b2e-f130-4fc5-9f1e-25356308d30c)
 ![7](https://github.com/user-attachments/assets/3c22cdf3-8eaf-4020-8803-a3d58a0e3a77)
+![8](https://github.com/user-attachments/assets/bf12dd0e-6002-42ab-841a-9828f595cc43)
+
 
 
 ## Tools Used in Development
