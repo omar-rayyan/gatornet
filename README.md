@@ -54,5 +54,5 @@ This project is not licensed, it is open-source and you may feel free to use any
 
 ## Contact
 
-For more information or inquiries, feel free to contact our team lead at omarrayyan999@gmail.com
+For more information or inquiries, feel free to contact our team lead at omarrayyan999@gmail.com.
 
